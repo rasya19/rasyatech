@@ -125,10 +125,19 @@ export default function Admin() {
   }, [user]);
 
   const handleLogin = async () => {
+    setSaveStatus(null);
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      if (error.code === 'auth/unauthorized-domain') {
+        setSaveStatus({ 
+          type: 'error', 
+          message: 'Domain belum di-whitelist di Firebase Console. Silakan tambahkan domain hosting Anda ke Authorized Domains di Firebase Auth settings.' 
+        });
+      } else {
+        setSaveStatus({ type: 'error', message: 'Gagal login: ' + (error.message || 'Error tidak diketahui') });
+      }
     }
   };
 
@@ -274,6 +283,14 @@ export default function Admin() {
           <Settings className="w-8 h-8" />
         </div>
         <h1 className="text-3xl font-black mb-4">Admin RasyaComp</h1>
+        {saveStatus && (
+          <div className={`mb-6 p-4 rounded-xl text-sm font-bold flex items-center gap-2 ${
+            saveStatus.type === 'error' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+          }`}>
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="text-left">{saveStatus.message}</span>
+          </div>
+        )}
         <p className="text-slate-500 mb-10 font-medium leading-relaxed">
           Silakan login menggunakan akun Google Anda untuk mengelola konten website.
         </p>
