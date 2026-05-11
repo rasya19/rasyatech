@@ -21,6 +21,7 @@ export default function RasyatechLanding() {
     heroSubtitle: 'Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan.' 
   });
   const [laptops, setLaptops] = useState<any[]>([]);
+  const [ads, setAds] = useState<any[]>([]);
   const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
@@ -44,10 +45,17 @@ export default function RasyatechLanding() {
       setLaptops(list);
     }, (err) => handleFirestoreError(err, OperationType.GET, 'laptops'));
 
+    // Listen to Ads
+    const unsubAds = onSnapshot(collection(db, 'ads'), (snap) => {
+      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAds(list.filter((ad: any) => ad.isActive));
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'ads'));
+
     return () => {
       unsubPayments();
       unsubConfig();
       unsubLaptops();
+      unsubAds();
     };
   }, []);
 
@@ -111,6 +119,7 @@ export default function RasyatechLanding() {
         <div className="nav-links">
           <a href="#about">Tentang</a>
           <a href="#layanan">Layanan</a>
+          {ads.length > 0 && <a href="#ads">Promo</a>}
           <a href="#inventory">Unit Laptop</a>
           <a href="#paket">Paket LMS</a>
           <a href="#daftar" className="btn-daftar">Daftar</a>
@@ -125,6 +134,29 @@ export default function RasyatechLanding() {
           <a href="#layanan" style={{ background: 'var(--gold)', color: 'var(--navy)', padding: '15px 30px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>Eksplorasi Layanan</a>
         </div>
       </section>
+
+      {ads.length > 0 && (
+        <section id="ads" className="ads-container" style={{ padding: '0 10%', background: '#f8f9fa' }}>
+          <div style={{ display: 'flex', overflowX: 'auto', gap: '20px', padding: '20px 0', scrollbarWidth: 'none' }}>
+            {ads.map((ad) => (
+              <a 
+                key={ad.id} 
+                href={ad.link || '#'} 
+                target={ad.link ? "_blank" : "_self"} 
+                rel="noopener noreferrer"
+                style={{ flex: '0 0 auto', width: '300px', display: 'block', textDecoration: 'none' }}
+              >
+                <div style={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 10px 20px rgba(0,0,0,0.05)', background: 'white' }}>
+                  <img src={ad.image} alt={ad.title} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                  <div style={{ padding: '15px' }}>
+                    <p style={{ margin: 0, fontWeight: 800, color: 'var(--navy)', fontSize: '0.9rem' }}>{ad.title}</p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section id="layanan" className="services">
         <h2>Layanan Unggulan Kami</h2>
@@ -355,8 +387,32 @@ export default function RasyatechLanding() {
         </p>
       </section>
 
+      {ads.length > 0 && (
+        <section className="ads-container bottom-ads" style={{ padding: '40px 10%', background: 'white' }}>
+          <h3 style={{ textAlign: 'center', marginBottom: '20px', fontSize: '1rem', color: '#ccc', textTransform: 'uppercase', letterSpacing: '2px' }}>Informasi Terkait</h3>
+          <div style={{ display: 'flex', overflowX: 'auto', gap: '20px', padding: '10px 0', scrollbarWidth: 'none' }}>
+            {ads.map((ad) => (
+              <a 
+                key={`${ad.id}-bottom`} 
+                href={ad.link || '#'} 
+                target={ad.link ? "_blank" : "_self"} 
+                rel="noopener noreferrer"
+                style={{ flex: '0 0 auto', width: '280px', display: 'block', textDecoration: 'none' }}
+              >
+                <div style={{ borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.03)', background: '#f8f9fa' }}>
+                  <img src={ad.image} alt={ad.title} style={{ width: '100%', height: '120px', objectFit: 'cover' }} />
+                  <div style={{ padding: '12px' }}>
+                    <p style={{ margin: 0, fontWeight: 700, color: 'var(--navy)', fontSize: '0.85rem' }}>{ad.title}</p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
       <footer>
-        <p><strong>&copy; 2026 Rasyatech by Rasyacomp</strong></p>
+        <p><strong>&copy; 2026 Rasyatech</strong></p>
         <div className="contact-info">
           📍 {config.address || 'Mekarwangi, Kuningan - Jawa Barat'}<br />
           📱 WhatsApp: <a href={`https://wa.me/${config.whatsapp || '6281918226387'}`} style={{ color: 'white', textDecoration: 'none' }}>{config.whatsapp || '081918226387'}</a> | ✉ Email: ismanto095@gmail.com

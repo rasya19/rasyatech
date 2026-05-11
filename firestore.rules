@@ -63,6 +63,11 @@ service cloud.firestore {
       allow write: if isVerifiedAdmin();
     }
 
+    match /ads/{adId} {
+      allow read: if true;
+      allow write: if isVerifiedAdmin() && isValidId(adId);
+    }
+
     match /services/{serviceId} {
       allow read: if true;
       allow write: if isVerifiedAdmin() && isValidService(incoming()) && isValidId(serviceId);

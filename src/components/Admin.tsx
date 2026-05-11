@@ -41,7 +41,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'ads'>('config');
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingPayments, setSavingPayments] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
@@ -60,10 +60,12 @@ export default function Admin() {
   });
   const [services, setServices] = useState<any[]>([]);
   const [laptops, setLaptops] = useState<any[]>([]);
+  const [ads, setAds] = useState<any[]>([]);
   
   // Edit States
   const [editingService, setEditingService] = useState<any>(null);
   const [editingLaptop, setEditingLaptop] = useState<any>(null);
+  const [editingAd, setEditingAd] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -100,11 +102,17 @@ export default function Admin() {
       setLaptops(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'laptops'));
 
+    // Listen to Ads
+    const unsubAds = onSnapshot(collection(db, 'ads'), (snap) => {
+      setAds(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'ads'));
+
     return () => {
       unsubConfig();
       unsubPayments();
       unsubServices();
       unsubLaptops();
+      unsubAds();
     };
   }, [user]);
 
@@ -189,6 +197,28 @@ export default function Admin() {
       setEditingLaptop(null);
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, `laptops/${id}`);
+    }
+  };
+
+  const handleDeleteAd = async (id: string) => {
+    if (!confirm('Yakin ingin menghapus iklan ini?')) return;
+    try {
+      await deleteDoc(doc(db, 'ads', id));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `ads/${id}`);
+    }
+  };
+
+  const handleSaveAd = async (e: FormEvent) => {
+    e.preventDefault();
+    const data = editingAd;
+    const id = data.id || Math.random().toString(36).substring(7);
+    try {
+      const { id: _, ...payload } = data;
+      await setDoc(doc(db, 'ads', id), payload);
+      setEditingAd(null);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `ads/${id}`);
     }
   };
 
@@ -278,7 +308,8 @@ export default function Admin() {
             { id: 'config', label: 'Konfigurasi', icon: <Settings className="w-5 h-5" /> },
             { id: 'payments', label: 'Pembayaran', icon: <CheckCircle2 className="w-5 h-5" /> },
             { id: 'services', label: 'Layanan', icon: <Monitor className="w-5 h-5" /> },
-            { id: 'laptops', label: 'Inventory Laptop', icon: <Package className="w-5 h-5" /> }
+            { id: 'laptops', label: 'Inventory Laptop', icon: <Package className="w-5 h-5" /> },
+            { id: 'ads', label: 'Slot Iklan', icon: <Settings className="w-5 h-5" /> }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -529,6 +560,49 @@ export default function Admin() {
               </div>
             </motion.div>
           )}
+
+          {/* Ads Section */}
+          {activeTab === 'ads' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+              <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100">
+                <h2 className="text-3xl font-black">Slot Iklan (Promo/Banner)</h2>
+                <button 
+                  onClick={() => setEditingAd({ title: '', image: '', link: '', isActive: true })}
+                  className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
+                >
+                  <Plus className="w-5 h-5" /> Tambah Iklan
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {ads.map(ad => (
+                  <div key={ad.id} className="bg-white rounded-[32px] border border-slate-100 overflow-hidden group">
+                    <div className="h-40 overflow-hidden relative">
+                      <img src={ad.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        <button onClick={() => setEditingAd(ad)} className="p-2 bg-white/90 backdrop-blur rounded-xl text-slate-900 shadow-lg layer-top"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteAd(ad.id)} className="p-2 bg-white/90 backdrop-blur rounded-xl text-red-500 shadow-lg layer-top"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                      {!ad.isActive && (
+                        <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                          <span className="bg-red-500 text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest">Non-Aktif</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-6">
+                      <h4 className="font-black text-lg mb-2">{ad.title}</h4>
+                      <p className="text-slate-400 text-xs truncate mb-4">{ad.link || 'Internal Link'}</p>
+                    </div>
+                  </div>
+                ))}
+                {ads.length === 0 && (
+                  <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+                    <p className="text-slate-400 font-bold">Belum ada iklan yang ditambahkan.</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -586,6 +660,37 @@ export default function Admin() {
                 <div className="flex gap-4 pt-4">
                   <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
                   <button type="button" onClick={() => setEditingLaptop(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {editingAd && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingAd(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-xl p-12 rounded-[40px] shadow-2xl">
+              <h3 className="text-3xl font-black mb-8">{editingAd.id ? 'Edit' : 'Tambah'} Iklan</h3>
+              <form onSubmit={handleSaveAd} className="space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Judul Iklan</label>
+                  <input type="text" required value={editingAd.title} onChange={e => setEditingAd({ ...editingAd, title: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Image URL (Upload di ImgBB/Lainnya)</label>
+                  <input type="text" required value={editingAd.image} onChange={e => setEditingAd({ ...editingAd, image: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Tautan / Link (Opsional)</label>
+                  <input type="text" value={editingAd.link} onChange={e => setEditingAd({ ...editingAd, link: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" placeholder="https://..." />
+                </div>
+                <div className="flex items-center gap-3 py-2">
+                  <input type="checkbox" checked={editingAd.isActive} onChange={e => setEditingAd({ ...editingAd, isActive: e.target.checked })} className="w-6 h-6 rounded border-slate-200 text-indigo-600 focus:ring-indigo-600" id="isActive" />
+                  <label htmlFor="isActive" className="text-sm font-black uppercase tracking-widest text-slate-400 cursor-pointer">Ditampilkan di Landing Page</label>
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
+                  <button type="button" onClick={() => setEditingAd(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
                 </div>
               </form>
             </motion.div>
