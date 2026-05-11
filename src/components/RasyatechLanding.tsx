@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom';
 
 export default function RasyatechLanding() {
   const [payments, setPayments] = useState<any>({
+    bankBcaProvider: 'BCA',
     bankBca: '1234567890',
+    bankMandiriProvider: 'Mandiri',
     bankMandiri: '0987654321',
     eWallet: '081918226387',
     bankBcaName: 'PT Rasyatech Digital',
@@ -212,11 +214,11 @@ export default function RasyatechLanding() {
         <div className="payment-grid">
           <div className="payment-card">
             <h4>🏧 Transfer Bank</h4>
-            <p><strong>Bank BCA</strong></p>
+            <p><strong>Bank {payments.bankBcaProvider || 'BCA'}</strong></p>
             <p>No. Rekening: {payments.bankBca} <button className="copy-btn" onClick={() => copyText(payments.bankBca)}>Salin</button></p>
             <p>a.n. {payments.bankBcaName}</p>
             <hr style={{ margin: '15px 0', border: 0, borderTop: '1px solid #ddd' }} />
-            <p><strong>Bank Mandiri</strong></p>
+            <p><strong>Bank {payments.bankMandiriProvider || 'Mandiri'}</strong></p>
             <p>No. Rekening: {payments.bankMandiri} <button className="copy-btn" onClick={() => copyText(payments.bankMandiri)}>Salin</button></p>
             <p>a.n. {payments.bankMandiriName}</p>
           </div>

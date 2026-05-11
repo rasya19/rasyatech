@@ -32,8 +32,10 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  ArrowLeft
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Admin() {
@@ -44,7 +46,9 @@ export default function Admin() {
   // Data States
   const [config, setConfig] = useState<any>({ whatsapp: '', address: '', openingHours: '', heroTitle: '', heroSubtitle: '' });
   const [payments, setPayments] = useState<any>({
+    bankBcaProvider: 'BCA',
     bankBca: '1234567890',
+    bankMandiriProvider: 'Mandiri',
     bankMandiri: '0987654321',
     eWallet: '081918226387',
     bankBcaName: 'PT Rasyatech Digital',
@@ -176,7 +180,14 @@ export default function Admin() {
   );
 
   if (!user) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6 relative">
+      <Link 
+        to="/" 
+        className="absolute top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-indigo-600 font-black transition-all bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Kembali ke Beranda
+      </Link>
       <div className="max-w-md w-full bg-white p-12 rounded-[32px] shadow-2xl text-center">
         <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-8 text-indigo-600">
           <Settings className="w-8 h-8" />
@@ -272,7 +283,7 @@ export default function Admin() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <button className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3">
+                  <button type="submit" className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3">
                     <Save className="w-5 h-5" /> Simpan Perubahan
                   </button>
                 </div>
@@ -286,9 +297,20 @@ export default function Admin() {
               <h2 className="text-3xl font-black mb-10">Konfigurasi Pembayaran</h2>
               <p className="text-slate-500 mb-8">Informasi ini akan tampil pada instruksi pembayaran setelah pendaftaran sekolah baru.</p>
               <form onSubmit={handleSavePayments} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* BCA */}
+                {/* Bank 1 */}
                 <div className="space-y-4 p-6 bg-slate-50 rounded-2xl">
-                  <h3 className="font-bold text-slate-800">Transfer Bank BCA</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-slate-800">Transfer Bank 1</h3>
+                    <select 
+                      value={payments.bankBcaProvider}
+                      onChange={(e) => setPayments({ ...payments, bankBcaProvider: e.target.value })}
+                      className="text-xs font-black bg-white border border-slate-200 rounded-lg px-2 py-1"
+                    >
+                      {['BCA', 'Mandiri', 'BNI', 'BRI', 'BTN', 'BSI', 'CIMB Niaga', 'Lainnya'].map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nomor Rekening</label>
                     <input 
@@ -309,9 +331,20 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Mandiri */}
+                {/* Bank 2 */}
                 <div className="space-y-4 p-6 bg-slate-50 rounded-2xl">
-                  <h3 className="font-bold text-slate-800">Transfer Bank Mandiri</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-slate-800">Transfer Bank 2</h3>
+                    <select 
+                      value={payments.bankMandiriProvider}
+                      onChange={(e) => setPayments({ ...payments, bankMandiriProvider: e.target.value })}
+                      className="text-xs font-black bg-white border border-slate-200 rounded-lg px-2 py-1"
+                    >
+                      {['Mandiri', 'BCA', 'BNI', 'BRI', 'BTN', 'BSI', 'CIMB Niaga', 'Lainnya'].map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nomor Rekening</label>
                     <input 
@@ -358,7 +391,7 @@ export default function Admin() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <button className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3 w-full justify-center">
+                  <button type="submit" className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3 w-full justify-center">
                     <Save className="w-5 h-5" /> Simpan Konfigurasi Pembayaran
                   </button>
                 </div>
