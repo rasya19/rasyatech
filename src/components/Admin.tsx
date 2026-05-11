@@ -65,6 +65,7 @@ export default function Admin() {
   const [products, setProducts] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [affiliates, setAffiliates] = useState<any[]>([]);
+  const [visitorCount, setVisitorCount] = useState<number>(0);
   
   // Edit States
   const [editingService, setEditingService] = useState<any>(null);
@@ -128,6 +129,13 @@ export default function Admin() {
       setAffiliates(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'affiliates'));
 
+    // Listen to Visitor Count
+    const unsubStats = onSnapshot(doc(db, 'stats', 'visitors'), (snap) => {
+      if (snap.exists()) {
+        setVisitorCount(snap.data().count || 0);
+      }
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'stats/visitors'));
+
     return () => {
       unsubConfig();
       unsubPayments();
@@ -137,6 +145,7 @@ export default function Admin() {
       unsubProducts();
       unsubRegistrations();
       unsubAffiliates();
+      unsubStats();
     };
   }, [user]);
 
@@ -383,6 +392,26 @@ export default function Admin() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-10 pt-12">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+           <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+             <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-2">Total Pengunjung</div>
+             <div className="text-4xl font-black text-indigo-600 font-mono tracking-tighter">{visitorCount.toLocaleString()}</div>
+           </div>
+           <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+             <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-2">Total Pendaftar</div>
+             <div className="text-4xl font-black text-slate-900 font-mono tracking-tighter">{registrations.length}</div>
+           </div>
+           <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+             <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-2">Mitra Affiliasi</div>
+             <div className="text-4xl font-black text-slate-900 font-mono tracking-tighter">{affiliates.length}</div>
+           </div>
+           <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+             <div className="text-[10px] uppercase font-black tracking-widest text-slate-400 mb-2">Inventory Unit</div>
+             <div className="text-4xl font-black text-slate-900 font-mono tracking-tighter">{laptops.length + products.length}</div>
+           </div>
+        </div>
+
         {/* Tabs */}
         <AnimatePresence>
           {saveStatus && (

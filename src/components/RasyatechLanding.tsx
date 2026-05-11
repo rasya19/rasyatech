@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, onSnapshot, collection, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot, collection, setDoc, serverTimestamp, increment, updateDoc, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 
@@ -78,6 +78,7 @@ export default function RasyatechLanding() {
   const [ads, setAds] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [affiliates, setAffiliates] = useState<any[]>([]);
+  const [visitorCount, setVisitorCount] = useState<number>(0);
   const [showPayment, setShowPayment] = useState(false);
   const [showDaftarDropdown, setShowDaftarDropdown] = useState(false);
 
@@ -120,6 +121,34 @@ export default function RasyatechLanding() {
       setAffiliates(list);
     }, (err) => handleFirestoreError(err, OperationType.GET, 'affiliates'));
 
+    // Visitor Count Logic
+    const visitorRef = doc(db, 'stats', 'visitors');
+    const hasVisited = sessionStorage.getItem('rasyatech_visited');
+    
+    if (!hasVisited) {
+      const updateCount = async () => {
+        try {
+          const snap = await getDoc(visitorRef);
+          if (!snap.exists()) {
+            await setDoc(visitorRef, { count: 1 });
+          } else {
+            await updateDoc(visitorRef, { count: increment(1) });
+          }
+          sessionStorage.setItem('rasyatech_visited', 'true');
+        } catch (e) {
+          console.error("Error updating visitor count", e);
+        }
+      };
+      updateCount();
+    }
+
+    // Listen to Visitor Count
+    const unsubStats = onSnapshot(visitorRef, (snap) => {
+      if (snap.exists()) {
+        setVisitorCount(snap.data().count || 0);
+      }
+    });
+
     return () => {
       unsubPayments();
       unsubConfig();
@@ -127,6 +156,7 @@ export default function RasyatechLanding() {
       unsubAds();
       unsubProducts();
       unsubAffiliates();
+      unsubStats();
     };
   }, []);
 
@@ -645,6 +675,9 @@ export default function RasyatechLanding() {
         <div className="contact-info">
           📍 {config.address || 'Mekarwangi, Kuningan - Jawa Barat'}<br />
           📱 WhatsApp: <a href={`https://wa.me/${config.whatsapp || '6281918226387'}`} style={{ color: 'white', textDecoration: 'none' }}>{config.whatsapp || '081918226387'}</a> | ✉ Email: ismanto095@gmail.com
+        </div>
+        <div style={{ marginTop: '20px', fontSize: '0.75rem', opacity: 0.6 }}>
+          👤 Jumlah Pengunjung: {visitorCount.toLocaleString()}
         </div>
       </footer>
     </div>

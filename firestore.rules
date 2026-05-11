@@ -78,6 +78,11 @@ service cloud.firestore {
       allow write: if true; // Allow public registration
     }
 
+    match /stats/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
     match /affiliates/{affiliateId} {
       allow read: if true;
       allow read: if isSignedIn() && resource.data.email.lower() == request.auth.token.email.lower();
