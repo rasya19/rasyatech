@@ -71,6 +71,7 @@ export default function Admin() {
   const [editingLaptop, setEditingLaptop] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
+  const [editingRegistration, setEditingRegistration] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -255,6 +256,23 @@ export default function Admin() {
       await updateDoc(doc(db, 'registrations', id), { status });
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `registrations/${id}`);
+    }
+  };
+
+  const handleSaveRegistration = async (e: FormEvent) => {
+    e.preventDefault();
+    const data = editingRegistration;
+    const id = data.id || Math.random().toString(36).substring(7);
+    try {
+      const { id: _, ...payload } = data;
+      await setDoc(doc(db, 'registrations', id), {
+        ...payload,
+        createdAt: payload.createdAt || new Date(),
+        status: payload.status || 'pending'
+      });
+      setEditingRegistration(null);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `registrations/${id}`);
     }
   };
 
@@ -684,9 +702,17 @@ export default function Admin() {
           {/* Registrations Section */}
           {activeTab === 'registrations' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-              <div className="bg-white p-8 rounded-[32px] border border-slate-100">
-                <h2 className="text-3xl font-black">Manajemen Pendaftar</h2>
-                <p className="text-slate-500 font-medium">Kelola pendaftaran sekolah baru dari landing page.</p>
+              <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100">
+                <div>
+                  <h2 className="text-3xl font-black">Manajemen Pendaftar</h2>
+                  <p className="text-slate-500 font-medium">Kelola pendaftaran sekolah baru dari landing page.</p>
+                </div>
+                <button 
+                  onClick={() => setEditingRegistration({ schoolName: '', package: 'Bronze', email: '', address: '', status: 'verified', affiliateEmail: '', commission: 0 })}
+                  className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
+                >
+                  <Plus className="w-5 h-5" /> Tambah Pendaftar
+                </button>
               </div>
 
               <div className="grid grid-cols-1 gap-6">
@@ -737,11 +763,18 @@ export default function Admin() {
                         <p className="font-bold text-indigo-600">{reg.affiliateEmail || 'Langsung'}</p>
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Status</label>
-                        <p className="font-bold text-slate-900">{reg.status}</p>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Masa Kontrak</label>
+                        <p className={`font-black text-xs ${
+                          reg.contractEnd && new Date(reg.contractEnd) < new Date() ? 'text-red-500' : 'text-emerald-600'
+                        }`}>
+                          {reg.contractEnd ? (
+                            new Date(reg.contractEnd) < new Date() ? 'EXPIRED: ' + reg.contractEnd : 'AKTIF s/d ' + reg.contractEnd
+                          ) : 'Belum Atur'}
+                        </p>
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
+                       <button onClick={() => setEditingRegistration(reg)} className="text-indigo-600 font-black text-xs px-4 py-2 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">Edit Data & Kontrak</button>
                        <input 
                          type="number" 
                          placeholder="Komisi (Rp)" 
@@ -784,8 +817,7 @@ export default function Admin() {
                     <div className="w-24 h-24 rounded-2xl overflow-hidden mb-4 bg-slate-50 p-2 border border-slate-100">
                       <img src={af.logo} alt={af.name} className="w-full h-full object-contain" />
                     </div>
-                    <h4 className="font-black text-lg mb-1">{af.name}</h4>
-                    <p className="text-slate-400 text-xs mb-6 truncate w-full px-4">{af.website}</p>
+                    <h4 className="font-black text-lg mb-4">{af.name}</h4>
                     <div className="flex gap-2 w-full">
                       <button onClick={() => setEditingAffiliate(af)} className="flex-1 py-3 bg-slate-50 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-100 transition-colors flex items-center justify-center gap-2"><Edit2 className="w-4 h-4" /> Edit</button>
                       <button onClick={() => handleDeleteAffiliate(af.id)} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"><Trash2 className="w-4 h-4" /></button>
@@ -926,13 +958,69 @@ export default function Admin() {
                     <input type="text" required value={editingAffiliate.referralCode} onChange={e => setEditingAffiliate({ ...editingAffiliate, referralCode: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" placeholder="Contoh: MITRA01" />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Website URL (Opsional)</label>
-                  <input type="text" value={editingAffiliate.website} onChange={e => setEditingAffiliate({ ...editingAffiliate, website: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" placeholder="https://..." />
-                </div>
                 <div className="flex gap-4 pt-4">
                   <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
                   <button type="button" onClick={() => setEditingAffiliate(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {editingRegistration && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingRegistration(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-xl p-10 rounded-[40px] shadow-2xl overflow-y-auto max-h-[90vh]">
+              <h3 className="text-3xl font-black mb-8">Tambah / Edit Pendaftar</h3>
+              <form onSubmit={handleSaveRegistration} className="space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Sekolah / Instansi</label>
+                  <input type="text" required value={editingRegistration.schoolName} onChange={e => setEditingRegistration({ ...editingRegistration, schoolName: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Alamat</label>
+                  <textarea required value={editingRegistration.address} onChange={e => setEditingRegistration({ ...editingRegistration, address: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold h-24" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Admin Sekolah</label>
+                    <input type="email" required value={editingRegistration.email} onChange={e => setEditingRegistration({ ...editingRegistration, email: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Paket</label>
+                    <select value={editingRegistration.package} onChange={e => setEditingRegistration({ ...editingRegistration, package: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold">
+                      <option>Bronze (Bulanan)</option>
+                      <option>Silver (Bulanan)</option>
+                      <option>Gold (Bulanan)</option>
+                      <option>Bronze (Annual Promo)</option>
+                      <option>Silver (Annual Promo)</option>
+                      <option>Gold (Annual Promo)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Mulai Kontrak</label>
+                    <input type="date" value={editingRegistration.contractStart} onChange={e => setEditingRegistration({ ...editingRegistration, contractStart: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Habis Kontrak</label>
+                    <input type="date" value={editingRegistration.contractEnd} onChange={e => setEditingRegistration({ ...editingRegistration, contractEnd: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Affiliate (Opsional)</label>
+                    <input type="email" value={editingRegistration.affiliateEmail} onChange={e => setEditingRegistration({ ...editingRegistration, affiliateEmail: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Komisi (Rp)</label>
+                    <input type="number" value={editingRegistration.commission} onChange={e => setEditingRegistration({ ...editingRegistration, commission: Number(e.target.value) })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  </div>
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
+                  <button type="button" onClick={() => setEditingRegistration(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
                 </div>
               </form>
             </motion.div>

@@ -212,7 +212,7 @@ export default function AffiliatePortal() {
                 <tr className="bg-slate-50/50">
                   <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Sekolah / Instansi</th>
                   <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Paket</th>
-                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
+                  <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status / Habis Kontrak</th>
                   <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Komisi Anda</th>
                 </tr>
               </thead>
@@ -227,11 +227,18 @@ export default function AffiliatePortal() {
                       <div className="text-sm font-black text-slate-600">{reg.package}</div>
                     </td>
                     <td className="px-8 py-6">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] ${
-                        reg.status === 'verified' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
-                      }`}>
-                        {reg.status}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className={`w-fit px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.1em] ${
+                          reg.status === 'verified' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+                        }`}>
+                          {reg.status}
+                        </span>
+                        {reg.contractEnd && (
+                          <span className={`text-[10px] font-black ${new Date(reg.contractEnd) < new Date() ? 'text-red-500' : 'text-slate-400'}`}>
+                            {new Date(reg.contractEnd) < new Date() ? 'EXPIRED' : 'Exp: ' + reg.contractEnd}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-8 py-6 text-right font-black text-indigo-600">
                       Rp {(reg.commission || 0).toLocaleString()}

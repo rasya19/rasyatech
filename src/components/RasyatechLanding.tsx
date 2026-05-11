@@ -165,6 +165,16 @@ export default function RasyatechLanding() {
       }
     }
     
+    // Calculate tentative expiry
+    const contractStart = new Date().toISOString().split('T')[0];
+    const contractEnd = new Date();
+    if (pkg.includes('Annual')) {
+      contractEnd.setFullYear(contractEnd.getFullYear() + 1);
+    } else {
+      contractEnd.setMonth(contractEnd.getMonth() + 1);
+    }
+    const contractEndDate = contractEnd.toISOString().split('T')[0];
+
     // Save to Firestore
     try {
       const regId = Math.random().toString(36).substring(7);
@@ -176,6 +186,8 @@ export default function RasyatechLanding() {
         password: pass,
         affiliateEmail: affiliateEmail,
         status: 'pending',
+        contractStart: contractStart,
+        contractEnd: contractEndDate,
         createdAt: serverTimestamp()
       });
       
