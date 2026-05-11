@@ -78,12 +78,16 @@ export default function Admin() {
 
     // Listen to Config
     const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
-      if (snap.exists()) setConfig(snap.data());
+      if (snap.exists()) {
+        setConfig((prev: any) => ({ ...prev, ...snap.data() }));
+      }
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
 
     // Listen to Payments
     const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
-      if (snap.exists()) setPayments(snap.data());
+      if (snap.exists()) {
+        setPayments((prev: any) => ({ ...prev, ...snap.data() }));
+      }
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
 
     // Listen to Services

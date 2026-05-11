@@ -25,12 +25,16 @@ export default function RasyatechLanding() {
   useEffect(() => {
     // Listen to Payments from Firestore
     const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
-      if (snap.exists()) setPayments(snap.data());
+      if (snap.exists()) {
+        setPayments((prev: any) => ({ ...prev, ...snap.data() }));
+      }
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
 
     // Listen to Config from Firestore
     const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
-      if (snap.exists()) setConfig(snap.data());
+      if (snap.exists()) {
+        setConfig((prev: any) => ({ ...prev, ...snap.data() }));
+      }
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
 
     return () => {
@@ -147,6 +151,9 @@ export default function RasyatechLanding() {
               💰 Rp 2.500.000 / Tahun<br />
               <span style={{ fontSize: '0.75rem' }}>(Promo Bayar 10 Bulan)</span>
             </div>
+            <div className="monthly-indicator" style={{ background: '#f1f2f6', padding: '10px', borderRadius: '10px', marginTop: '10px', fontSize: '0.85rem' }}>
+              📅 Opsi Bulanan Tersedia
+            </div>
             <p style={{ fontSize: '0.85rem', color: '#e67e22', fontWeight: 600, marginTop: '-10px' }}>Setup: Rp 500.000 (Sekali)</p>
             <ul>
               <li><strong>Ideal:</strong> Sekolah Kecil / PKBM</li>
@@ -164,6 +171,9 @@ export default function RasyatechLanding() {
             <div className="annual-price">
               💰 Rp 5.000.000 / Tahun<br />
               <span style={{ fontSize: '0.75rem' }}>(Promo Bayar 10 Bulan)</span>
+            </div>
+            <div className="monthly-indicator" style={{ background: '#f1f2f6', padding: '10px', borderRadius: '10px', marginTop: '10px', fontSize: '0.85rem' }}>
+              📅 Opsi Bulanan Tersedia
             </div>
             <p style={{ fontSize: '0.85rem', color: '#e67e22', fontWeight: 600, marginTop: '-10px' }}>Setup: Rp 1.000.000 (Sekali)</p>
             <ul>

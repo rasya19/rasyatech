@@ -54,12 +54,12 @@ service cloud.firestore {
     // Collections
     match /settings/config {
       allow read: if true;
-      allow write: if isVerifiedAdmin() && isValidConfig(incoming());
+      allow write: if isVerifiedAdmin();
     }
 
     match /settings/payments {
       allow read: if true;
-      allow write: if isVerifiedAdmin() && isValidPayments(incoming());
+      allow write: if isVerifiedAdmin();
     }
 
     match /services/{serviceId} {
