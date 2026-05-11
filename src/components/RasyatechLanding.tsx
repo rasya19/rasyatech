@@ -3,6 +3,43 @@ import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 
+const BannerAd = () => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Check if script already exists in this container to prevent duplicates
+    if (containerRef.current && containerRef.current.childNodes.length === 0) {
+      const script = document.createElement('script');
+      const conf = document.createElement('script');
+      
+      conf.innerHTML = `
+        atOptions = {
+          'key' : '3bae6710c4aa9be96222d65a398c7bfc',
+          'format' : 'iframe',
+          'height' : 90,
+          'width' : 728,
+          'params' : {}
+        };
+      `;
+      
+      script.src = "https://www.highperformanceformat.com/3bae6710c4aa9be96222d65a398c7bfc/invoke.js";
+      script.async = true;
+
+      containerRef.current.appendChild(conf);
+      containerRef.current.appendChild(script);
+    }
+  }, []);
+
+  return (
+    <div className="banner-ad-wrapper" style={{ display: 'flex', justifyContent: 'center', margin: '40px 0', width: '100%', overflow: 'hidden' }}>
+      <div ref={containerRef} style={{ width: '728px', height: '90px', background: '#f8f9fa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#ccc' }}>
+        {/* Ad will load here */}
+        Ad Space (728x90)
+      </div>
+    </div>
+  );
+};
+
 export default function RasyatechLanding() {
   const [payments, setPayments] = useState<any>({
     bankBcaProvider: 'BCA',
@@ -134,6 +171,8 @@ export default function RasyatechLanding() {
           <a href="#layanan" style={{ background: 'var(--gold)', color: 'var(--navy)', padding: '15px 30px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>Eksplorasi Layanan</a>
         </div>
       </section>
+
+      <BannerAd />
 
       {ads.length > 0 && (
         <section id="ads" className="ads-container" style={{ padding: '0 10%', background: '#f8f9fa' }}>
@@ -410,6 +449,8 @@ export default function RasyatechLanding() {
           </div>
         </section>
       )}
+
+      <BannerAd />
 
       <footer>
         <p><strong>&copy; 2026 Rasyatech</strong></p>
