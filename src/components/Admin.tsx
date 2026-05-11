@@ -898,6 +898,55 @@ export default function Admin() {
               </div>
             </motion.div>
           )}
+
+          {/* Teachers Section */}
+          {activeTab === 'teachers' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+              <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100">
+                <div>
+                  <h2 className="text-3xl font-black">Manajemen Data Guru</h2>
+                  <p className="text-slate-500 font-medium">Kelola profil guru dari berbagai instansi mitra.</p>
+                </div>
+                <button 
+                  onClick={() => setEditingTeacher({ fullName: '', nip: '', email: '', phone: '', password: '', schoolName: '' })}
+                  className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
+                >
+                  <Plus className="w-5 h-5" /> Tambah Guru
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {teachers.map(guru => (
+                  <div key={guru.id} className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <Users className="w-7 h-7" />
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => setEditingTeacher(guru)} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteTeacher(guru.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-xl font-black">{guru.fullName}</h4>
+                        <p className="text-xs font-black uppercase tracking-widest text-slate-400">NIP: {guru.nip || '-'}</p>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2 text-sm font-bold text-slate-600">
+                        <div className="flex items-center gap-2"><Settings className="w-4 h-4 text-slate-400" /> {guru.schoolName || 'Umum'}</div>
+                        <div className="flex items-center gap-2"><Users className="w-4 h-4 text-slate-400" /> {guru.email}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {teachers.length === 0 && (
+                  <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+                    <p className="text-slate-400 font-bold">Belum ada data guru tersimpan.</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
