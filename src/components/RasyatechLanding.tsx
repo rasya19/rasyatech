@@ -178,15 +178,15 @@ export default function RasyatechLanding() {
     <div>
       <nav>
         <div className="logo">RASYATECH</div>
-        <div className="nav-links">
+        <div className="nav-links" style={{ gap: '25px', display: 'flex', alignItems: 'center' }}>
           <a href="#about">Tentang</a>
           <a href="#layanan">Layanan</a>
           {ads.length > 0 && <a href="#ads">Promo</a>}
           <a href="#inventory">Unit Laptop</a>
-          {products.length > 0 && <a href="#shop">Aksesoris</a>}
-          <a href="#paket">Paket LMS</a>
-          <a href="#daftar" className="btn-daftar">Daftar</a>
-          <Link to="/admin" className="btn-login">Portal Admin</Link>
+          <a href="#shop">Katalog Produk</a>
+          <a href="#paket">Paket</a>
+          <a href="#daftar" className="btn-daftar" style={{ marginLeft: '10px' }}>Daftar</a>
+          <Link to="/admin" className="btn-login" style={{ marginLeft: '5px' }}>Portal Admin</Link>
         </div>
       </nav>
 
@@ -228,7 +228,7 @@ export default function RasyatechLanding() {
         <div className="service-grid">
           <div className="card">
             <h3>LMS Rasyatech</h3>
-            <p>Sistem manajemen sekolah modern untuk PKBM, SMK, dan instansi pendidikan lainnya.</p>
+            <p>Sistem manajemen sekolah modern untuk semua jenjang dan instansi pendidikan lainnya.</p>
           </div>
           <div className="card">
             <h3>Servis IT & Komputer</h3>
@@ -293,11 +293,11 @@ export default function RasyatechLanding() {
         </section>
       )}
 
-      {products.length > 0 && (
-        <section id="shop" className="products-section" style={{ padding: '80px 10%', background: '#f8f9fa' }}>
-          <h2 style={{ textAlign: 'center', marginBottom: '10px', color: 'var(--navy)' }}>Katalog Aksesoris & Hardware</h2>
-          <p style={{ textAlign: 'center', marginBottom: '40px', color: '#666' }}>Part laptop, aksesoris komputer, dan perangkat keras lainnya tersedia di RasyaComp.</p>
-          
+      <section id="shop" className="products-section" style={{ padding: '80px 10%', background: '#f8f9fa' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '10px', color: 'var(--navy)' }}>Katalog Aksesoris & Hardware</h2>
+        <p style={{ textAlign: 'center', marginBottom: '40px', color: '#666' }}>Part laptop, aksesoris komputer, dan perangkat keras lainnya tersedia di RasyaComp.</p>
+        
+        {products.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
             {products.map((p) => (
               <div key={p.id} style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.02)', border: '1px solid #eee' }}>
@@ -320,8 +320,12 @@ export default function RasyatechLanding() {
               </div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '20px', border: '2px dashed #eee' }}>
+            <p style={{ color: '#aaa', fontWeight: 600 }}>Produk masih dalam tahap input oleh Admin. Silakan kembali lagi nanti.</p>
+          </div>
+        )}
+      </section>
 
       <section id="paket" className="pricing">
         <h2>Pilihan Paket LMS Rasyatech</h2>
