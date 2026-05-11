@@ -39,10 +39,18 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments'>('config');
   
   // Data States
   const [config, setConfig] = useState<any>({ whatsapp: '', address: '', openingHours: '', heroTitle: '', heroSubtitle: '' });
+  const [payments, setPayments] = useState<any>({
+    bankBca: '1234567890',
+    bankMandiri: '0987654321',
+    eWallet: '081918226387',
+    bankBcaName: 'PT Rasyatech Digital',
+    bankMandiriName: 'PT Rasyatech Digital',
+    eWalletName: 'Admin Rasyatech'
+  });
   const [services, setServices] = useState<any[]>([]);
   const [laptops, setLaptops] = useState<any[]>([]);
   
@@ -66,6 +74,11 @@ export default function Admin() {
       if (snap.exists()) setConfig(snap.data());
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
 
+    // Listen to Payments
+    const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
+      if (snap.exists()) setPayments(snap.data());
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
+
     // Listen to Services
     const unsubServices = onSnapshot(query(collection(db, 'services'), orderBy('title')), (snap) => {
       setServices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -78,6 +91,7 @@ export default function Admin() {
 
     return () => {
       unsubConfig();
+      unsubPayments();
       unsubServices();
       unsubLaptops();
     };
@@ -98,6 +112,16 @@ export default function Admin() {
       alert('Config saved!');
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'settings/config');
+    }
+  };
+
+  const handleSavePayments = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      await setDoc(doc(db, 'settings', 'payments'), payments);
+      alert('Payment settings saved!');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'settings/payments');
     }
   };
 
@@ -199,6 +223,7 @@ export default function Admin() {
         <div className="flex flex-wrap gap-4 mb-12">
           {[
             { id: 'config', label: 'Konfigurasi', icon: <Settings className="w-5 h-5" /> },
+            { id: 'payments', label: 'Pembayaran', icon: <CheckCircle2 className="w-5 h-5" /> },
             { id: 'services', label: 'Layanan', icon: <Monitor className="w-5 h-5" /> },
             { id: 'laptops', label: 'Inventory Laptop', icon: <Package className="w-5 h-5" /> }
           ].map((tab) => (
@@ -249,6 +274,92 @@ export default function Admin() {
                 <div className="md:col-span-2">
                   <button className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3">
                     <Save className="w-5 h-5" /> Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+
+          {/* Payments Section */}
+          {activeTab === 'payments' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-12 rounded-[40px] shadow-sm border border-slate-100">
+              <h2 className="text-3xl font-black mb-10">Konfigurasi Pembayaran</h2>
+              <p className="text-slate-500 mb-8">Informasi ini akan tampil pada instruksi pembayaran setelah pendaftaran sekolah baru.</p>
+              <form onSubmit={handleSavePayments} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* BCA */}
+                <div className="space-y-4 p-6 bg-slate-50 rounded-2xl">
+                  <h3 className="font-bold text-slate-800">Transfer Bank BCA</h3>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nomor Rekening</label>
+                    <input 
+                      type="text" 
+                      value={payments.bankBca} 
+                      onChange={(e) => setPayments({ ...payments, bankBca: e.target.value })}
+                      className="w-full p-3 bg-white border-none rounded-xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Atas Nama</label>
+                    <input 
+                      type="text" 
+                      value={payments.bankBcaName} 
+                      onChange={(e) => setPayments({ ...payments, bankBcaName: e.target.value })}
+                      className="w-full p-3 bg-white border-none rounded-xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* Mandiri */}
+                <div className="space-y-4 p-6 bg-slate-50 rounded-2xl">
+                  <h3 className="font-bold text-slate-800">Transfer Bank Mandiri</h3>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nomor Rekening</label>
+                    <input 
+                      type="text" 
+                      value={payments.bankMandiri} 
+                      onChange={(e) => setPayments({ ...payments, bankMandiri: e.target.value })}
+                      className="w-full p-3 bg-white border-none rounded-xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Atas Nama</label>
+                    <input 
+                      type="text" 
+                      value={payments.bankMandiriName} 
+                      onChange={(e) => setPayments({ ...payments, bankMandiriName: e.target.value })}
+                      className="w-full p-3 bg-white border-none rounded-xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* E-Wallet */}
+                <div className="space-y-4 p-6 bg-slate-50 rounded-2xl md:col-span-2">
+                  <h3 className="font-bold text-slate-800">DANA / OVO / GoPay (E-Wallet)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nomor HP</label>
+                      <input 
+                        type="text" 
+                        value={payments.eWallet} 
+                        onChange={(e) => setPayments({ ...payments, eWallet: e.target.value })}
+                        className="w-full p-3 bg-white border-none rounded-xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Atas Nama</label>
+                      <input 
+                        type="text" 
+                        value={payments.eWalletName} 
+                        onChange={(e) => setPayments({ ...payments, eWalletName: e.target.value })}
+                        className="w-full p-3 bg-white border-none rounded-xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <button className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3 w-full justify-center">
+                    <Save className="w-5 h-5" /> Simpan Konfigurasi Pembayaran
                   </button>
                 </div>
               </form>

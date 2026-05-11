@@ -1,87 +1,270 @@
-import { useState } from 'react';
-import { Phone, Mail, ChevronRight, Laptop, Server, Code, BookOpenText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { Link } from 'react-router-dom';
 
 export default function RasyatechLanding() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [payments, setPayments] = useState<any>({
+    bankBca: '1234567890',
+    bankMandiri: '0987654321',
+    eWallet: '081918226387',
+    bankBcaName: 'PT Rasyatech Digital',
+    bankMandiriName: 'PT Rasyatech Digital',
+    eWalletName: 'Admin Rasyatech'
+  });
+  const [showPayment, setShowPayment] = useState(false);
+
+  useEffect(() => {
+    // Listen to Payments from Firestore
+    const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
+      if (snap.exists()) setPayments(snap.data());
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
+
+    return () => unsubPayments();
+  }, []);
+
+  const selectPackage = (pkg: string) => {
+    const select = document.getElementById('packageSelect') as HTMLSelectElement;
+    if (select) {
+      if (pkg === 'Silver') select.value = 'Silver (Annual Promo)';
+      else if (pkg === 'Gold') select.value = 'Gold (Annual Promo)';
+      else if (pkg === 'Platinum') select.value = 'Platinum';
+      
+      const daftarSection = document.getElementById('daftar');
+      daftarSection?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleRegistration = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const pkg = formData.get('package') as string;
+    const school = formData.get('school_name');
+    const addr = formData.get('address');
+    const email = formData.get('email');
+    const pass = formData.get('password');
+    
+    let promoText = "";
+    if (pkg.includes("Annual Promo")) {
+        promoText = `Saya tertarik dengan Promo Tahunan Paket ${pkg.split(' ')[0]}.%0A`;
+    }
+
+    const message = `Halo Rasyatech,%0A%0A${promoText}Saya ingin mendaftarkan sekolah baru:%0A` +
+                    `Paket: ${pkg}%0A` +
+                    `Nama Sekolah: ${school}%0A` +
+                    `Alamat: ${addr}%0A` +
+                    `Email Admin: ${email}%0A` +
+                    `Password Request: ${pass}%0A%0A` +
+                    `Mohon diproses untuk pembuatan akun admin sekolah kami. Terima kasih.`;
+    
+    window.open(`https://wa.me/6281918226387?text=${message}`, '_blank');
+    setShowPayment(true);
+    setTimeout(() => {
+      document.getElementById('payment')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Teks berhasil disalin: ' + text);
+    });
+  };
 
   return (
-    <div className="font-sans text-slate-900 bg-white">
-      {/* Head: Import Poppins Font (Add this in src/index.css ideally, but here in-line via tailwind config if possible or just normal import) */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
-        body { font-family: 'Poppins', sans-serif; }
-      `}</style>
-      
-      {/* Navigation */}
-      <nav className="fixed w-full z-[100] bg-slate-950 text-white p-4 shadow-lg border-b border-amber-700">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-4">
-          <div className="text-3xl font-extrabold italic tracking-tight text-amber-400">Rasyatech</div>
-          <div className="hidden md:flex gap-8 font-semibold items-center">
-            <a href="#hero" className="hover:text-amber-400 transition">Beranda</a>
-            <a href="#about" className="hover:text-amber-400 transition">Tentang</a>
-            <a href="#services" className="hover:text-amber-400 transition">Layanan</a>
-            <a href="#portfolio" className="hover:text-amber-400 transition">Portofolio</a>
-            <a href="#contact" className="hover:text-amber-400 transition">Kontak</a>
-            <a href="https://lms.rasyatech.rsch.my.id" target="_blank" rel="noopener noreferrer" className="bg-amber-500 text-slate-950 px-5 py-2 rounded-full font-bold hover:bg-amber-400 transition">Login LMS Sekolah</a>
-          </div>
+    <div>
+      <nav>
+        <div className="logo">RASYATECH</div>
+        <div className="nav-links">
+          <a href="#about">Tentang</a>
+          <a href="#layanan">Layanan</a>
+          <a href="#paket">Paket LMS</a>
+          <a href="#daftar" className="btn-daftar">Daftar</a>
+          <Link to="/admin" className="btn-login">Portal Admin</Link>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section id="hero" className="pt-32 pb-20 bg-slate-900 text-white min-h-[80vh] flex items-center">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-6">Mitra Digitalisasi Pendidikan & Teknologi di Kuningan</h1>
-          <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto">Solusi IT profesional untuk kebutuhan sekolah, instansi, dan bisnis Anda.</p>
-          <a href="#services" className="bg-amber-500 text-slate-900 px-8 py-3 rounded-full font-bold hover:bg-amber-600 transition">Pelajari LMS Kami</a>
+      <section className="hero">
+        <h1>Transformasi Digital Masa Depan</h1>
+        <p>Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan.</p>
+        <div>
+          <a href="#layanan" style={{ background: 'var(--gold)', color: 'var(--navy)', padding: '15px 30px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>Eksplorasi Layanan</a>
         </div>
       </section>
 
-      {/* About */}
-      <section id="about" className="py-20 px-4 bg-white text-center">
-        <h2 className="text-3xl font-bold mb-6 text-slate-900">Tentang Kami</h2>
-        <p className="max-w-2xl mx-auto text-slate-600">Rasyatech adalah divisi teknologi dari Rasyacomp, fokus memberikan solusi IT lokal yang andal dan terjangkau di Lebakwangi dan sekitarnya.</p>
-      </section>
-
-      {/* Services */}
-      <section id="services" className="py-20 px-4 bg-slate-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12 text-slate-900">Layanan Unggulan</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { title: "LMS Rasyatech", desc: "Sistem Manajemen Sekolah Terintegrasi (PKBM, SMK, dll).", icon: <BookOpenText className="w-10 h-10 text-amber-500" /> },
-              { title: "Jasa Servis IT", desc: "Perbaikan Komputer, Laptop, dan Jaringan (by Rasyacomp).", icon: <Laptop className="w-10 h-10 text-amber-500" /> },
-              { title: "Web Development", desc: "Pembuatan website profesional untuk instansi dan bisnis.", icon: <Code className="w-10 h-10 text-amber-500" /> },
-            ].map((s, i) => (
-              <div key={i} className="bg-white p-8 rounded-xl shadow-md border hover:border-amber-500 transition">
-                <div className="mb-4">{s.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{s.title}</h3>
-                <p className="text-slate-600">{s.desc}</p>
-              </div>
-            ))}
+      <section id="layanan" className="services">
+        <h2>Layanan Unggulan Kami</h2>
+        <div className="service-grid">
+          <div className="card">
+            <h3>LMS Rasyatech</h3>
+            <p>Sistem manajemen sekolah modern untuk PKBM, SMK, dan instansi pendidikan lainnya.</p>
+          </div>
+          <div className="card">
+            <h3>Servis IT & Komputer</h3>
+            <p>Perbaikan hardware, laptop, dan pemeliharaan jaringan kantor oleh tenaga ahli Rasyacomp.</p>
+          </div>
+          <div className="card">
+            <h3>Web Development</h3>
+            <p>Pembuatan website profil sekolah atau bisnis dengan teknologi PWA dan Next.js.</p>
           </div>
         </div>
       </section>
 
-      {/* Portfolio */}
-      <section id="portfolio" className="py-20 px-4 text-center">
-        <h2 className="text-3xl font-bold mb-12 text-slate-900">Portofolio</h2>
-        <div className="max-w-md mx-auto p-8 bg-slate-100 rounded-lg">
-          <p className="font-semibold text-slate-800">Klien Pertama:</p>
-          <div className="text-2xl font-bold text-slate-900">PKBM Armilla Nusa</div>
+      <section id="paket" className="pricing">
+        <h2>Pilihan Paket LMS Rasyatech</h2>
+        <div className="promo-banner-container">
+          <a href="https://wa.me/6281918226387?text=Halo%20Rasyatech,%20saya%20tertarik%20dengan%20Promo%20Tahunan:%20Bayar%2010%20Bulan,%20Gratis%202%20Bulan." target="_blank" rel="noopener noreferrer" className="promo-banner">
+            🔥 Hemat 20% dengan Pembayaran Tahunan (Bayar 10 Bulan, Gratis 2 Bulan!)
+          </a>
+        </div>
+        <p>Solusi manajemen digital yang dirancang untuk pertumbuhan sekolah Anda.</p>
+        <div className="pricing-grid">
+          <div className="price-card silver">
+            <h4>Silver Package</h4>
+            <div className="price">Rp 250.000 <span style={{ fontSize: '1rem', color: '#666' }}>/ Bulan</span></div>
+            <div className="annual-price">
+              💰 Rp 2.500.000 / Tahun<br />
+              <span style={{ fontSize: '0.75rem' }}>(Promo Bayar 10 Bulan)</span>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: '#e67e22', fontWeight: 600, marginTop: '-10px' }}>Setup: Rp 500.000 (Sekali)</p>
+            <ul>
+              <li><strong>Ideal:</strong> Sekolah Kecil / PKBM</li>
+              <li><strong>Domain:</strong> Subdomain (.rsch.my.id)</li>
+              <li><strong>Penyimpanan:</strong> 2GB Cloud Storage</li>
+              <li>Support Email/WA Group</li>
+            </ul>
+            <button onClick={() => selectPackage('Silver')} style={{ display: 'block', width: '100%', background: 'var(--navy)', color: 'white', padding: '12px', borderRadius: '5px', fontWeight: 700 }}>Pilih Paket</button>
+          </div>
+          <div className="price-card gold featured">
+            <div className="badge">Terpopuler</div>
+            <h4>Gold Package</h4>
+            <div className="price">Rp 500.000 <span style={{ fontSize: '1rem', color: '#666' }}>/ Bulan</span></div>
+            <div className="annual-price">
+              💰 Rp 5.000.000 / Tahun<br />
+              <span style={{ fontSize: '0.75rem' }}>(Promo Bayar 10 Bulan)</span>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: '#e67e22', fontWeight: 600, marginTop: '-10px' }}>Setup: Rp 1.000.000 (Sekali)</p>
+            <ul>
+              <li><strong>Ideal:</strong> SMK / SMA / SMP</li>
+              <li><strong>Domain:</strong> Subdomain (.rsch.my.id)</li>
+              <li><strong>Penyimpanan:</strong> 10GB Cloud Storage</li>
+              <li>Prioritas Jam Kerja</li>
+            </ul>
+            <button onClick={() => selectPackage('Gold')} style={{ display: 'block', width: '100%', background: 'var(--gold)', color: 'var(--navy)', padding: '12px', borderRadius: '5px', fontWeight: 700 }}>Pilih Paket</button>
+          </div>
+          <div className="price-card platinum">
+            <h4>Platinum Package</h4>
+            <div className="price">Custom</div>
+            <div className="annual-price" style={{ background: '#f1f2f6', color: '#2f3542', borderColor: '#ced6e0' }}>
+              💎 Paket Eksklusif<br />
+              <span style={{ fontSize: '0.75rem' }}>Sesuai Kebutuhan Besar</span>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: '#e67e22', fontWeight: 600, marginTop: '-10px' }}>Setup: Custom Setup</p>
+            <ul>
+              <li><strong>Ideal:</strong> Yayasan / Sekolah Besar</li>
+              <li><strong>Domain:</strong> Custom Domain (.sch.id)</li>
+              <li><strong>Penyimpanan:</strong> Unlimited / Sesuai Server</li>
+              <li>24/7 + On-Site Support</li>
+            </ul>
+            <button onClick={() => selectPackage('Platinum')} style={{ display: 'block', width: '100%', background: 'var(--navy)', color: 'white', padding: '12px', borderRadius: '5px', fontWeight: 700 }}>Hubungi Kami</button>
+          </div>
         </div>
       </section>
 
-      {/* Contact */}
-      <section id="contact" className="py-20 px-4 bg-slate-900 text-white text-center">
-        <h2 className="text-3xl font-bold mb-12">Kontak Kami</h2>
-        <div className="flex flex-col gap-4 items-center">
-          <a href="https://wa.me/6285224025555" className="flex items-center gap-2 text-lg hover:text-amber-500"><Phone /> 085224025555</a>
-          <a href="mailto:ismanto095@gmail.com" className="flex items-center gap-2 text-lg hover:text-amber-500"><Mail /> ismanto095@gmail.com</a>
+      <section id="daftar" className="registration">
+        <div className="form-container">
+          <h2>Pendaftaran Sekolah Baru</h2>
+          <p style={{ marginBottom: '2rem', fontSize: '0.9rem', color: '#666' }}>Isi data di bawah ini. Akun Admin akan dikirimkan setelah proses verifikasi oleh tim Rasyatech.</p>
+          <form id="regForm" onSubmit={handleRegistration}>
+            <div className="form-group">
+              <label>Paket yang Diminati</label>
+              <select name="package" id="packageSelect" required>
+                <option value="">-- Pilih Paket --</option>
+                <option value="Silver (Annual Promo)">Silver Package (Promo Tahunan)</option>
+                <option value="Gold (Annual Promo)">Gold Package (Promo Tahunan)</option>
+                <option value="Platinum">Platinum Package</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Nama Sekolah / Instansi</label>
+              <input type="text" name="school_name" required placeholder="Contoh: PKBM Armilla Nusa" />
+            </div>
+            <div className="form-group">
+              <label>Alamat Sekolah</label>
+              <input type="text" name="address" required placeholder="Contoh: Mekarwangi, Kuningan" />
+            </div>
+            <div className="form-group">
+              <label>Email Utama (Admin)</label>
+              <input type="email" name="email" required placeholder="Contoh: admin@sekolah.sch.id" />
+            </div>
+            <div className="form-group">
+              <label>Password Admin (Nantinya)</label>
+              <input type="password" name="password" required placeholder="Min. 8 Karakter" />
+            </div>
+            <button type="submit" className="btn-submit">Kirim Pendaftaran</button>
+          </form>
         </div>
-        <p className="mt-10 text-slate-400">Lebakwangi, Kuningan, Jawa Barat</p>
       </section>
-      
-      {/* Footer comment: Replace images in img tags when available */}
+
+      <section id="payment" className={`payment-info ${showPayment ? 'active' : ''}`}>
+        <h2 style={{ color: 'var(--navy)' }}>Instruksi Pembayaran</h2>
+        <p>Silakan lakukan pembayaran sesuai dengan paket yang Anda pilih untuk mengaktifkan akun Admin Sekolah.</p>
+
+        <div className="payment-grid">
+          <div className="payment-card">
+            <h4>🏧 Transfer Bank</h4>
+            <p><strong>Bank BCA</strong></p>
+            <p>No. Rekening: {payments.bankBca} <button className="copy-btn" onClick={() => copyText(payments.bankBca)}>Salin</button></p>
+            <p>a.n. {payments.bankBcaName}</p>
+            <hr style={{ margin: '15px 0', border: 0, borderTop: '1px solid #ddd' }} />
+            <p><strong>Bank Mandiri</strong></p>
+            <p>No. Rekening: {payments.bankMandiri} <button className="copy-btn" onClick={() => copyText(payments.bankMandiri)}>Salin</button></p>
+            <p>a.n. {payments.bankMandiriName}</p>
+          </div>
+
+          <div className="payment-card">
+            <h4>📱 E-Wallet / QRIS</h4>
+            <p><strong>DANA / OVO / GoPay</strong></p>
+            <p>No. HP: {payments.eWallet} <button className="copy-btn" onClick={() => copyText(payments.eWallet)}>Salin</button></p>
+            <p>a.n. {payments.eWalletName}</p>
+            <div style={{ marginTop: '15px', background: '#eee', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}>
+              <span style={{ fontSize: '0.8rem', color: '#666' }}>QRIS Standar Tersedia</span>
+            </div>
+          </div>
+
+          <div className="payment-card">
+            <h4>💳 Virtual Account</h4>
+            <p>Pilih menu Virtual Account pada ATM/M-Banking Anda:</p>
+            <p><strong>BCA VA:</strong> 80777 + No. HP</p>
+            <p><strong>Mandiri VA:</strong> 90342 + No. HP</p>
+            <p><strong>BRI VA:</strong> 128 + No. HP</p>
+            <p style={{ fontSize: '0.8rem', color: '#e74c3c', marginTop: '10px' }}>*Konfirmasi otomatis setelah pembayaran.</p>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '3rem', padding: '2rem', borderRadius: '10px', background: '#fff9e6', border: '1px solid #ffeaa7' }}>
+          <p><strong>Setelah Transfer:</strong> Kirim Bukti Pembayaran ke WhatsApp Admin kami untuk percepatan aktivasi server sekolah Anda.</p>
+          <a href="https://wa.me/6281918226387?text=Konfirmasi%20Pembayaran%20Rasyatech" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: '#27ae60', color: 'white', padding: '10px 20px', borderRadius: '5px', textDecoration: 'none', fontWeight: 700 }}>Konfirmasi Via WhatsApp</a>
+        </div>
+      </section>
+
+      <section className="portfolio">
+        <h2>Mitra Strategis & Klien</h2>
+        <div className="mitra-grid">
+          <div className="client-logo">PKBM ARMILLA NUSA</div>
+          <div className="client-logo">MITRA AFFILIASI</div>
+        </div>
+        <p style={{ marginTop: '2rem', color: '#666', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+          Membangun ekosistem pendidikan digital yang inklusif bersama mitra terpercaya di seluruh daerah.
+        </p>
+      </section>
+
+      <footer>
+        <p><strong>&copy; 2026 Rasyatech by Rasyacomp</strong></p>
+        <div className="contact-info">
+          📍 Mekarwangi, Kuningan - Jawa Barat<br />
+          📱 WhatsApp: <a href="https://wa.me/6281918226387" style={{ color: 'white', textDecoration: 'none' }}>081918226387</a> | ✉ Email: ismanto095@gmail.com
+        </div>
+      </footer>
     </div>
   );
 }
