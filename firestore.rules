@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedAdmin() {
+      return isSignedIn() && 
+             (request.auth.token.email == 'Ismanto095@gmail.com' && request.auth.token.email_verified == true) ||
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity Validations
+    function isValidConfig(data) {
+      return data.keys().hasAll(['whatsapp', 'address']) &&
+             data.whatsapp is string && data.whatsapp.size() <= 20 &&
+             data.address is string && data.address.size() <= 200;
+    }
+
+    function isValidService(data) {
+      return data.keys().hasAll(['title', 'description']) &&
+             data.title is string && data.title.size() <= 100 &&
+             data.description is string && data.description.size() <= 500;
+    }
+
+    function isValidLaptop(data) {
+      return data.keys().hasAll(['name', 'price', 'image']) &&
+             data.name is string && data.name.size() <= 100 &&
+             data.price is string && data.price.size() <= 50 &&
+             data.image is string && data.image.size() <= 1000;
+    }
+
+    // Collections
+    match /settings/config {
+      allow read: if true;
+      allow write: if isVerifiedAdmin() && isValidConfig(incoming());
+    }
+
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isVerifiedAdmin() && isValidService(incoming()) && isValidId(serviceId);
+    }
+
+    match /laptops/{laptopId} {
+      allow read: if true;
+      allow write: if isVerifiedAdmin() && isValidLaptop(incoming()) && isValidId(laptopId);
+    }
+
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Only manageable via console or functions
+    }
+  }
+}
