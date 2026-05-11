@@ -733,9 +733,25 @@ export default function Admin() {
                         <p className="font-bold text-slate-900">{reg.address}</p>
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Tanggal Daftar</label>
-                        <p className="font-bold text-slate-900">{reg.createdAt?.toDate ? reg.createdAt.toDate().toLocaleString() : 'Baru saja'}</p>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Referral</label>
+                        <p className="font-bold text-indigo-600">{reg.affiliateEmail || 'Langsung'}</p>
                       </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Status</label>
+                        <p className="font-bold text-slate-900">{reg.status}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex gap-2">
+                       <input 
+                         type="number" 
+                         placeholder="Komisi (Rp)" 
+                         className="p-2 border rounded-lg text-sm font-bold w-32"
+                         value={reg.commission || ''}
+                         onChange={(e) => {
+                           const val = e.target.value;
+                           updateDoc(doc(db, 'registrations', reg.id), { commission: Number(val) || 0 });
+                         }}
+                       />
                     </div>
                   </div>
                 ))}
@@ -755,7 +771,7 @@ export default function Admin() {
               <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100">
                 <h2 className="text-3xl font-black">Manajemen Affiliasi</h2>
                 <button 
-                  onClick={() => setEditingAffiliate({ name: '', logo: '', website: '' })}
+                  onClick={() => setEditingAffiliate({ name: '', logo: '', website: '', email: '', referralCode: '' })}
                   className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
                 >
                   <Plus className="w-5 h-5" /> Tambah Mitra
@@ -899,6 +915,16 @@ export default function Admin() {
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Logo URL</label>
                   <input type="text" required value={editingAffiliate.logo} onChange={e => setEditingAffiliate({ ...editingAffiliate, logo: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Affiliate</label>
+                    <input type="email" required value={editingAffiliate.email} onChange={e => setEditingAffiliate({ ...editingAffiliate, email: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Referral Code</label>
+                    <input type="text" required value={editingAffiliate.referralCode} onChange={e => setEditingAffiliate({ ...editingAffiliate, referralCode: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" placeholder="Contoh: MITRA01" />
+                  </div>
                 </div>
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Website URL (Opsional)</label>

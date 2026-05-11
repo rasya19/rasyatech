@@ -74,12 +74,13 @@ service cloud.firestore {
     }
 
     match /registrations/{regId} {
-      allow read: if isVerifiedAdmin();
+      allow read: if isVerifiedAdmin() || (isSignedIn() && resource.data.affiliateEmail.lower() == request.auth.token.email.lower());
       allow write: if true; // Allow public registration
     }
 
     match /affiliates/{affiliateId} {
       allow read: if true;
+      allow read: if isSignedIn() && resource.data.email.lower() == request.auth.token.email.lower();
       allow write: if isVerifiedAdmin() && isValidId(affiliateId);
     }
 

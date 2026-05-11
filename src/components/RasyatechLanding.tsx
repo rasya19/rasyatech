@@ -155,6 +155,15 @@ export default function RasyatechLanding() {
     const addr = formData.get('address') as string;
     const email = formData.get('email') as string;
     const pass = formData.get('password') as string;
+    const refCode = (formData.get('referral_code') as string || '').toUpperCase();
+    
+    let affiliateEmail = '';
+    if (refCode) {
+      const affiliate = affiliates.find(a => a.referralCode?.toUpperCase() === refCode);
+      if (affiliate) {
+        affiliateEmail = affiliate.email || '';
+      }
+    }
     
     // Save to Firestore
     try {
@@ -165,6 +174,7 @@ export default function RasyatechLanding() {
         address: addr,
         email: email,
         password: pass,
+        affiliateEmail: affiliateEmail,
         status: 'pending',
         createdAt: serverTimestamp()
       });
@@ -263,6 +273,14 @@ export default function RasyatechLanding() {
                 >
                   🤝 Daftar Mitra Affiliasi
                 </a>
+                <Link 
+                  to="/affiliate/portal"
+                  style={{ display: 'block', padding: '12px 15px', color: 'var(--navy)', textDecoration: 'none', fontWeight: 700, borderRadius: '8px', borderTop: '1px solid #f1f2f6', marginTop: '5px' }}
+                  onMouseOver={(e) => (e.currentTarget.style.background = '#f8f9fa')}
+                  onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  📊 Portal Mitra (Login)
+                </Link>
               </div>
             )}
           </div>
@@ -507,6 +525,10 @@ export default function RasyatechLanding() {
             <div className="form-group">
               <label>Password Admin (Nantinya)</label>
               <input type="password" name="password" required placeholder="Min. 8 Karakter" />
+            </div>
+            <div className="form-group">
+              <label>Kode Referral (Opsional)</label>
+              <input type="text" name="referral_code" placeholder="Contoh: MITRA01" />
             </div>
             <button type="submit" className="btn-submit">Kirim Pendaftaran</button>
           </form>
