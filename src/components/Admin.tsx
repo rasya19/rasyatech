@@ -41,7 +41,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'ads'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'ads' | 'products'>('config');
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingPayments, setSavingPayments] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
@@ -61,11 +61,13 @@ export default function Admin() {
   const [services, setServices] = useState<any[]>([]);
   const [laptops, setLaptops] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   
   // Edit States
   const [editingService, setEditingService] = useState<any>(null);
   const [editingLaptop, setEditingLaptop] = useState<any>(null);
   const [editingAd, setEditingAd] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -107,12 +109,18 @@ export default function Admin() {
       setAds(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'ads'));
 
+    // Listen to Products
+    const unsubProducts = onSnapshot(query(collection(db, 'products'), orderBy('name')), (snap) => {
+      setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'products'));
+
     return () => {
       unsubConfig();
       unsubPayments();
       unsubServices();
       unsubLaptops();
       unsubAds();
+      unsubProducts();
     };
   }, [user]);
 
@@ -222,6 +230,28 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm('Yakin ingin menghapus barang ini?')) return;
+    try {
+      await deleteDoc(doc(db, 'products', id));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `products/${id}`);
+    }
+  };
+
+  const handleSaveProduct = async (e: FormEvent) => {
+    e.preventDefault();
+    const data = editingProduct;
+    const id = data.id || Math.random().toString(36).substring(7);
+    try {
+      const { id: _, ...payload } = data;
+      await setDoc(doc(db, 'products', id), payload);
+      setEditingProduct(null);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `products/${id}`);
+    }
+  };
+
   const isAuthorized = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
 
   if (loading) return (
@@ -309,6 +339,7 @@ export default function Admin() {
             { id: 'payments', label: 'Pembayaran', icon: <CheckCircle2 className="w-5 h-5" /> },
             { id: 'services', label: 'Layanan', icon: <Monitor className="w-5 h-5" /> },
             { id: 'laptops', label: 'Inventory Laptop', icon: <Package className="w-5 h-5" /> },
+            { id: 'products', label: 'Katalog Barang', icon: <Package className="w-5 h-5" /> },
             { id: 'ads', label: 'Slot Iklan', icon: <Settings className="w-5 h-5" /> }
           ].map((tab) => (
             <button
@@ -603,6 +634,45 @@ export default function Admin() {
               </div>
             </motion.div>
           )}
+
+          {/* Products Section */}
+          {activeTab === 'products' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+              <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100">
+                <h2 className="text-3xl font-black">Katalog Barang (Aksesoris/Sparepart)</h2>
+                <button 
+                  onClick={() => setEditingProduct({ name: '', price: '', image: '', category: 'Aksesoris', isAvailable: true })}
+                  className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
+                >
+                  <Plus className="w-5 h-5" /> Tambah Barang
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {products.map(p => (
+                  <div key={p.id} className="bg-white rounded-[32px] border border-slate-100 overflow-hidden group">
+                    <div className="h-40 overflow-hidden relative">
+                      <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        <button onClick={() => setEditingProduct(p)} className="p-2 bg-white/90 backdrop-blur rounded-xl text-slate-900 shadow-lg"><Edit2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteProduct(p.id)} className="p-2 bg-white/90 backdrop-blur rounded-xl text-red-500 shadow-lg"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <div className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-1">{p.category}</div>
+                      <h4 className="font-black text-lg mb-2">{p.name}</h4>
+                      <p className="text-slate-900 font-black">{p.price}</p>
+                    </div>
+                  </div>
+                ))}
+                {products.length === 0 && (
+                  <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+                    <p className="text-slate-400 font-bold">Belum ada barang di katalog.</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -691,6 +761,45 @@ export default function Admin() {
                 <div className="flex gap-4 pt-4">
                   <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
                   <button type="button" onClick={() => setEditingAd(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {editingProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProduct(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-xl p-12 rounded-[40px] shadow-2xl">
+              <h3 className="text-3xl font-black mb-8">{editingProduct.id ? 'Edit' : 'Tambah'} Barang</h3>
+              <form onSubmit={handleSaveProduct} className="space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Barang</label>
+                  <input type="text" required value={editingProduct.name} onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Harga</label>
+                    <input type="text" required value={editingProduct.price} onChange={e => setEditingProduct({ ...editingProduct, price: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Kategori</label>
+                    <select value={editingProduct.category} onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold">
+                      <option value="Aksesoris">Aksesoris</option>
+                      <option value="Suku Cadang">Suku Cadang</option>
+                      <option value="Hardware">Hardware</option>
+                      <option value="Software">Software</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Image URL</label>
+                  <input type="text" required value={editingProduct.image} onChange={e => setEditingProduct({ ...editingProduct, image: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
+                  <button type="button" onClick={() => setEditingProduct(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
                 </div>
               </form>
             </motion.div>

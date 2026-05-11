@@ -76,6 +76,7 @@ export default function RasyatechLanding() {
   });
   const [laptops, setLaptops] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
@@ -105,11 +106,18 @@ export default function RasyatechLanding() {
       setAds(list.filter((ad: any) => ad.isActive));
     }, (err) => handleFirestoreError(err, OperationType.GET, 'ads'));
 
+    // Listen to Products
+    const unsubProducts = onSnapshot(collection(db, 'products'), (snap) => {
+      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setProducts(list);
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'products'));
+
     return () => {
       unsubPayments();
       unsubConfig();
       unsubLaptops();
       unsubAds();
+      unsubProducts();
     };
   }, []);
 
@@ -175,6 +183,7 @@ export default function RasyatechLanding() {
           <a href="#layanan">Layanan</a>
           {ads.length > 0 && <a href="#ads">Promo</a>}
           <a href="#inventory">Unit Laptop</a>
+          {products.length > 0 && <a href="#shop">Aksesoris</a>}
           <a href="#paket">Paket LMS</a>
           <a href="#daftar" className="btn-daftar">Daftar</a>
           <Link to="/admin" className="btn-login">Portal Admin</Link>
@@ -276,6 +285,36 @@ export default function RasyatechLanding() {
                     }}
                   >
                     Tanya Admin
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {products.length > 0 && (
+        <section id="shop" className="products-section" style={{ padding: '80px 10%', background: '#f8f9fa' }}>
+          <h2 style={{ textAlign: 'center', marginBottom: '10px', color: 'var(--navy)' }}>Katalog Aksesoris & Hardware</h2>
+          <p style={{ textAlign: 'center', marginBottom: '40px', color: '#666' }}>Part laptop, aksesoris komputer, dan perangkat keras lainnya tersedia di RasyaComp.</p>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
+            {products.map((p) => (
+              <div key={p.id} style={{ background: 'white', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.02)', border: '1px solid #eee' }}>
+                <div style={{ height: '160px', overflow: 'hidden' }}>
+                  <img src={p.image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ padding: '15px' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 900, color: 'white', background: 'var(--navy)', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>{p.category}</span>
+                  <h4 style={{ margin: '8px 0 4px', fontSize: '1rem', fontWeight: 800 }}>{p.name}</h4>
+                  <p style={{ color: 'var(--gold)', fontWeight: 800, margin: '8px 0' }}>{p.price}</p>
+                  <a 
+                    href={`https://wa.me/${config.whatsapp || '6281918226387'}?text=Halo%20Rasyatech,%20saya%20tertarik%20dengan%20${p.name}%20seharga%20${p.price}.%20apakah%20stok%20tersedia?`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'block', textAlign: 'center', padding: '8px', background: '#f1f2f6', color: 'var(--navy)', borderRadius: '8px', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 700 }}
+                  >
+                    Beli Sekarang
                   </a>
                 </div>
               </div>
