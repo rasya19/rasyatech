@@ -68,6 +68,16 @@
             margin-bottom: 2.5rem; 
             box-shadow: 0 5px 20px rgba(255, 77, 77, 0.4);
             animation: bounce 2s infinite;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            z-index: 10;
+            text-decoration: none;
+        }
+        .promo-banner:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 77, 77, 0.6);
+            color: white;
         }
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
@@ -146,9 +156,9 @@
 
     <section id="paket" class="pricing">
         <h2>Pilihan Paket LMS Rasyatech</h2>
-        <div class="promo-banner">
+        <a href="https://wa.me/6281918226387?text=Halo%20Rasyatech,%20saya%20tertarik%20dengan%20Promo%20Tahunan:%20Bayar%2010%20Bulan,%20Gratis%202%20Bulan." target="_blank" rel="noopener noreferrer" class="promo-banner">
             🔥 Hemat 20% dengan Pembayaran Tahunan (Bayar 10 Bulan, Gratis 2 Bulan!)
-        </div>
+        </a>
         <p>Solusi manajemen digital yang dirancang untuk pertumbuhan sekolah Anda.</p>
         <div class="pricing-grid">
             <div class="price-card silver">
@@ -281,7 +291,7 @@
                             `Password Request: ${pass}%0A%0A` +
                             `Mohon diproses untuk pembuatan akun admin sekolah kami. Terima kasih.`;
             
-            window.open(`https://wa.me/081918226387?text=${message}`, '_blank');
+            window.open(`https://wa.me/6281918226387?text=${message}`, '_blank');
         });
     </script>
 
@@ -289,7 +299,7 @@
         <p><strong>&copy; 2026 Rasyatech by Rasyacomp</strong></p>
         <div class="contact-info">
             📍 Mekarwangi, Kuningan - Jawa Barat<br>
-            📱 WhatsApp: 081918226387 | ✉ Email: ismanto095@gmail.com
+            📱 WhatsApp: <a href="https://wa.me/6281918226387" style="color: white; text-decoration: none;">081918226387</a> | ✉ Email: ismanto095@gmail.com
         </div>
     </footer>
 
