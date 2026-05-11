@@ -13,14 +13,16 @@ export default function RasyatechLanding() {
       `}</style>
       
       {/* Navigation */}
-      <nav className="fixed w-full z-50 bg-slate-900 text-white p-4 shadow-lg">
+      <nav className="fixed w-full z-[100] bg-slate-950 text-white p-4 shadow-lg border-b border-amber-700">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4">
-          <div className="text-2xl font-bold italic tracking-tight text-amber-500">Rasyatech</div>
-          <div className="hidden md:flex gap-6 font-semibold">
-            <a href="#hero" className="hover:text-amber-500">Beranda</a>
-            <a href="#about" className="hover:text-amber-500">Tentang</a>
-            <a href="#services" className="hover:text-amber-500">Layanan</a>
-            <a href="#contact" className="hover:text-amber-500">Kontak</a>
+          <div className="text-3xl font-extrabold italic tracking-tight text-amber-400">Rasyatech</div>
+          <div className="hidden md:flex gap-8 font-semibold items-center">
+            <a href="#hero" className="hover:text-amber-400 transition">Beranda</a>
+            <a href="#about" className="hover:text-amber-400 transition">Tentang</a>
+            <a href="#services" className="hover:text-amber-400 transition">Layanan</a>
+            <a href="#portfolio" className="hover:text-amber-400 transition">Portofolio</a>
+            <a href="#contact" className="hover:text-amber-400 transition">Kontak</a>
+            <a href="https://lms.rasyatech.rsch.my.id" target="_blank" rel="noopener noreferrer" className="bg-amber-500 text-slate-950 px-5 py-2 rounded-full font-bold hover:bg-amber-400 transition">Login LMS Sekolah</a>
           </div>
         </div>
       </nav>
