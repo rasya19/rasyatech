@@ -192,6 +192,8 @@ export default function Admin() {
     }
   };
 
+  const isAuthorized = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
@@ -227,6 +229,11 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
+      {!isAuthorized && user && (
+        <div className="bg-red-500 text-white px-10 py-3 text-center text-sm font-black uppercase tracking-widest sticky top-0 z-[100] shadow-xl">
+          ⚠️ Akun ini ({user.email}) tidak memiliki akses simpan. Hubungi Developer.
+        </div>
+      )}
       <nav className="bg-white border-b border-slate-100 py-6 px-10 flex justify-between items-center sticky top-0 z-40">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">

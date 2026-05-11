@@ -12,9 +12,10 @@ service cloud.firestore {
     }
 
     function isVerifiedAdmin() {
-      return isSignedIn() && 
-             (request.auth.token.email == 'Ismanto095@gmail.com' && request.auth.token.email_verified == true) ||
-             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return isSignedIn() && (
+        request.auth.token.email.lower() == 'ismanto095@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
     }
 
     function isValidId(id) {
