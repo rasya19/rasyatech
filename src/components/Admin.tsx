@@ -42,6 +42,8 @@ export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments'>('config');
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [savingPayments, setSavingPayments] = useState(false);
   
   // Data States
   const [config, setConfig] = useState<any>({ whatsapp: '', address: '', openingHours: '', heroTitle: '', heroSubtitle: '' });
@@ -111,21 +113,27 @@ export default function Admin() {
 
   const handleSaveConfig = async (e: FormEvent) => {
     e.preventDefault();
+    setSavingConfig(true);
     try {
       await setDoc(doc(db, 'settings', 'config'), config);
-      alert('Config saved!');
+      alert('Konfigurasi berhasil disimpan!');
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'settings/config');
+    } finally {
+      setSavingConfig(false);
     }
   };
 
   const handleSavePayments = async (e: FormEvent) => {
     e.preventDefault();
+    setSavingPayments(true);
     try {
       await setDoc(doc(db, 'settings', 'payments'), payments);
-      alert('Payment settings saved!');
+      alert('Konfigurasi pembayaran berhasil disimpan!');
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'settings/payments');
+    } finally {
+      setSavingPayments(false);
     }
   };
 
@@ -292,8 +300,13 @@ export default function Admin() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <button type="submit" className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3">
-                    <Save className="w-5 h-5" /> Simpan Perubahan
+                  <button 
+                    type="submit" 
+                    disabled={savingConfig}
+                    className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all"
+                  >
+                    {savingConfig ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                    {savingConfig ? 'Menyimpan...' : 'Simpan Perubahan'}
                   </button>
                 </div>
               </form>
@@ -400,8 +413,13 @@ export default function Admin() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <button type="submit" className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3 w-full justify-center">
-                    <Save className="w-5 h-5" /> Simpan Konfigurasi Pembayaran
+                  <button 
+                    type="submit" 
+                    disabled={savingPayments}
+                    className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center gap-3 w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700 transition-all"
+                  >
+                    {savingPayments ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                    {savingPayments ? 'Menyimpan...' : 'Simpan Konfigurasi Pembayaran'}
                   </button>
                 </div>
               </form>

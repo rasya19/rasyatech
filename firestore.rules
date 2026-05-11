@@ -32,15 +32,13 @@ service cloud.firestore {
     // Entity Validations
     function isValidConfig(data) {
       return data.keys().hasAll(['whatsapp', 'address']) &&
-             data.whatsapp is string && data.whatsapp.size() <= 20 &&
-             data.address is string && data.address.size() <= 200 &&
-             (!data.keys().hasAny(['heroTitle']) || data.heroTitle is string) &&
-             (!data.keys().hasAny(['heroSubtitle']) || data.heroSubtitle is string);
+             data.whatsapp is string &&
+             data.address is string;
     }
 
     function isValidPayments(data) {
       return data.keys().hasAll(['eWallet', 'eWalletName']) &&
-             data.eWallet is string && data.eWallet.size() <= 100;
+             data.eWallet is string;
     }
 
     function isValidService(data) {
