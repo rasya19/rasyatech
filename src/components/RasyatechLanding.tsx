@@ -79,6 +79,7 @@ export default function RasyatechLanding() {
   const [products, setProducts] = useState<any[]>([]);
   const [affiliates, setAffiliates] = useState<any[]>([]);
   const [showPayment, setShowPayment] = useState(false);
+  const [showDaftarDropdown, setShowDaftarDropdown] = useState(false);
 
   useEffect(() => {
     // Listen to Payments from Firestore
@@ -214,7 +215,57 @@ export default function RasyatechLanding() {
           <a href="#inventory">Unit Laptop</a>
           <a href="#shop">Katalog Produk</a>
           <a href="#paket">Paket</a>
-          <a href="#daftar" className="btn-daftar" style={{ marginLeft: '10px' }}>Daftar</a>
+          <div className="relative group" style={{ position: 'relative' }}>
+            <button 
+              onMouseEnter={() => setShowDaftarDropdown(true)}
+              onClick={() => setShowDaftarDropdown(!showDaftarDropdown)}
+              className="btn-daftar" 
+              style={{ marginLeft: '10px', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}
+            >
+              Daftar
+              <svg className={`w-4 h-4 transition-transform ${showDaftarDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            
+            {showDaftarDropdown && (
+              <div 
+                onMouseLeave={() => setShowDaftarDropdown(false)}
+                style={{ 
+                  position: 'absolute', 
+                  top: '100%', 
+                  right: 0, 
+                  background: 'white', 
+                  borderRadius: '12px', 
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)', 
+                  padding: '10px', 
+                  minWidth: '200px', 
+                  marginTop: '10px',
+                  zIndex: 1001,
+                  border: '1px solid #f1f2f6'
+                }}
+              >
+                <a 
+                  href="#daftar" 
+                  onClick={() => setShowDaftarDropdown(false)}
+                  style={{ display: 'block', padding: '12px 15px', color: 'var(--navy)', textDecoration: 'none', fontWeight: 700, borderRadius: '8px', marginBottom: '5px' }}
+                  onMouseOver={(e) => (e.currentTarget.style.background = '#f8f9fa')}
+                  onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  🚀 Daftar Paket LMS
+                </a>
+                <a 
+                  href={`https://wa.me/${config.whatsapp || '6281918226387'}?text=Halo%20Rasyatech,%20saya%20ingin%20mendaftar%20sebagai%20Mitra%20Affiliasi.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setShowDaftarDropdown(false)}
+                  style={{ display: 'block', padding: '12px 15px', color: 'var(--navy)', textDecoration: 'none', fontWeight: 700, borderRadius: '8px' }}
+                  onMouseOver={(e) => (e.currentTarget.style.background = '#f8f9fa')}
+                  onMouseOut={(e) => (e.currentTarget.style.background = 'transparent')}
+                >
+                  🤝 Daftar Mitra Affiliasi
+                </a>
+              </div>
+            )}
+          </div>
           <Link to="/admin" className="btn-login" style={{ marginLeft: '5px' }}>Portal Admin</Link>
         </div>
       </nav>
