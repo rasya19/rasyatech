@@ -33,7 +33,8 @@ import {
   XCircle,
   AlertCircle,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  Users
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -41,7 +42,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'ads' | 'products'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'products' | 'registrations'>('config');
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingPayments, setSavingPayments] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
@@ -62,6 +63,7 @@ export default function Admin() {
   const [laptops, setLaptops] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [registrations, setRegistrations] = useState<any[]>([]);
   
   // Edit States
   const [editingService, setEditingService] = useState<any>(null);
@@ -113,6 +115,11 @@ export default function Admin() {
       setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'products'));
 
+    // Listen to Registrations
+    const unsubRegistrations = onSnapshot(query(collection(db, 'registrations'), orderBy('createdAt', 'desc')), (snap) => {
+      setRegistrations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'registrations'));
+
     return () => {
       unsubConfig();
       unsubPayments();
@@ -120,6 +127,7 @@ export default function Admin() {
       unsubLaptops();
       unsubAds();
       unsubProducts();
+      unsubRegistrations();
     };
   }, [user]);
 
@@ -222,6 +230,23 @@ export default function Admin() {
       await deleteDoc(doc(db, 'products', id));
     } catch (err) {
       handleFirestoreError(err, OperationType.DELETE, `products/${id}`);
+    }
+  };
+
+  const handleDeleteRegistration = async (id: string) => {
+    if (!confirm('Hapus data pendaftar ini?')) return;
+    try {
+      await deleteDoc(doc(db, 'registrations', id));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `registrations/${id}`);
+    }
+  };
+
+  const handleUpdateRegStatus = async (id: string, status: string) => {
+    try {
+      await updateDoc(doc(db, 'registrations', id), { status });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.UPDATE, `registrations/${id}`);
     }
   };
 
@@ -333,7 +358,8 @@ export default function Admin() {
             { id: 'payments', label: 'Pembayaran', icon: <CheckCircle2 className="w-5 h-5" /> },
             { id: 'services', label: 'Layanan', icon: <Monitor className="w-5 h-5" /> },
             { id: 'laptops', label: 'Inventory Laptop', icon: <Package className="w-5 h-5" /> },
-            { id: 'products', label: 'Katalog Barang', icon: <Package className="w-5 h-5" /> }
+            { id: 'products', label: 'Katalog Barang', icon: <Package className="w-5 h-5" /> },
+            { id: 'registrations', label: 'Pendaftar', icon: <Users className="w-5 h-5" /> }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -618,6 +644,74 @@ export default function Admin() {
                 {products.length === 0 && (
                   <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
                     <p className="text-slate-400 font-bold">Belum ada barang di katalog.</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Registrations Section */}
+          {activeTab === 'registrations' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+              <div className="bg-white p-8 rounded-[32px] border border-slate-100">
+                <h2 className="text-3xl font-black">Manajemen Pendaftar</h2>
+                <p className="text-slate-500 font-medium">Kelola pendaftaran sekolah baru dari landing page.</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                {registrations.map(reg => (
+                  <div key={reg.id} className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="text-xl font-black">{reg.schoolName}</h4>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                            reg.status === 'pending' ? 'bg-amber-100 text-amber-600' : 
+                            reg.status === 'verified' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {reg.status}
+                          </span>
+                        </div>
+                        <p className="text-slate-500 font-bold flex items-center gap-2">
+                          <Package className="w-4 h-4" /> {reg.package}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleUpdateRegStatus(reg.id, reg.status === 'verified' ? 'pending' : 'verified')}
+                          className={`px-4 py-2 rounded-xl font-black text-xs flex items-center gap-2 ${
+                            reg.status === 'verified' ? 'bg-slate-100 text-slate-600' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-100'
+                          }`}
+                        >
+                          {reg.status === 'verified' ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                          {reg.status === 'verified' ? 'Batalkan Verifikasi' : 'Verifikasi'}
+                        </button>
+                        <button onClick={() => handleDeleteRegistration(reg.id)} className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-50">
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Kontak Admin</label>
+                        <p className="font-bold text-slate-900">{reg.email}</p>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Alamat Sekolah</label>
+                        <p className="font-bold text-slate-900">{reg.address}</p>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Tanggal Daftar</label>
+                        <p className="font-bold text-slate-900">{reg.createdAt?.toDate ? reg.createdAt.toDate().toLocaleString() : 'Baru saja'}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {registrations.length === 0 && (
+                  <div className="py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+                    <p className="text-slate-400 font-bold">Belum ada pendaftaran baru.</p>
                   </div>
                 )}
               </div>

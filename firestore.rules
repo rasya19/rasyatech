@@ -73,6 +73,11 @@ service cloud.firestore {
       allow write: if isVerifiedAdmin() && isValidId(productId);
     }
 
+    match /registrations/{regId} {
+      allow read: if isVerifiedAdmin();
+      allow write: if true; // Allow public registration
+    }
+
     match /services/{serviceId} {
       allow read: if true;
       allow write: if isVerifiedAdmin() && isValidService(incoming()) && isValidId(serviceId);

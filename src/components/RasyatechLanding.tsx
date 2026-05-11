@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, onSnapshot, collection } from 'firebase/firestore';
+import { doc, onSnapshot, collection, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 
@@ -137,35 +137,56 @@ export default function RasyatechLanding() {
     }
   };
 
-  const handleRegistration = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegistration = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const target = e.currentTarget;
+    const formData = new FormData(target);
     const pkg = formData.get('package') as string;
-    const school = formData.get('school_name');
-    const addr = formData.get('address');
-    const email = formData.get('email');
-    const pass = formData.get('password');
+    const school = formData.get('school_name') as string;
+    const addr = formData.get('address') as string;
+    const email = formData.get('email') as string;
+    const pass = formData.get('password') as string;
     
-    let promoText = "";
-    if (pkg.includes("Annual Promo")) {
-        promoText = `Saya tertarik dengan Promo Tahunan Paket ${pkg.split(' ')[0]}.%0A`;
-    } else if (pkg.includes("Monthly")) {
-        promoText = `Saya tertarik dengan Paket Bulanan ${pkg.split(' ')[0]}.%0A`;
-    }
+    // Save to Firestore
+    try {
+      const regId = Math.random().toString(36).substring(7);
+      await setDoc(doc(db, 'registrations', regId), {
+        package: pkg,
+        schoolName: school,
+        address: addr,
+        email: email,
+        password: pass,
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+      
+      let promoText = "";
+      if (pkg.includes("Annual Promo")) {
+          promoText = `Saya tertarik dengan Promo Tahunan Paket ${pkg.split(' ')[0]}.%0A`;
+      } else if (pkg.includes("Monthly")) {
+          promoText = `Saya tertarik dengan Paket Bulanan ${pkg.split(' ')[0]}.%0A`;
+      }
 
-    const message = `Halo Rasyatech,%0A%0A${promoText}Saya ingin mendaftarkan sekolah baru:%0A` +
-                    `Paket: ${pkg}%0A` +
-                    `Nama Sekolah: ${school}%0A` +
-                    `Alamat: ${addr}%0A` +
-                    `Email Admin: ${email}%0A` +
-                    `Password Request: ${pass}%0A%0A` +
-                    `Mohon diproses untuk pembuatan akun admin sekolah kami. Terima kasih.`;
-    
-    window.open(`https://wa.me/${config.whatsapp || '6281918226387'}?text=${message}`, '_blank');
-    setShowPayment(true);
-    setTimeout(() => {
-      document.getElementById('payment')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+      const message = `Halo Rasyatech,%0A%0A${promoText}Saya ingin mendaftarkan sekolah baru:%0A` +
+                      `Paket: ${pkg}%0A` +
+                      `Nama Sekolah: ${school}%0A` +
+                      `Alamat: ${addr}%0A` +
+                      `Email Admin: ${email}%0A` +
+                      `Password Request: ${pass}%0A%0A` +
+                      `Mohon diproses untuk pembuatan akun admin sekolah kami. Terima kasih.`;
+      
+      window.open(`https://wa.me/${config.whatsapp || '6281918226387'}?text=${message}`, '_blank');
+      setShowPayment(true);
+      target.reset();
+      
+      setTimeout(() => {
+        document.getElementById('payment')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
+      alert('Pendaftaran berhasil dikirim! Silakan ikuti instruksi pembayaran.');
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'registrations');
+    }
   };
 
   const copyText = (text: string) => {
