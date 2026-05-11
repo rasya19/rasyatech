@@ -54,7 +54,37 @@
         .price-card.featured .badge { background: var(--gold); color: var(--navy); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; position: absolute; top: 10px; right: 10px; }
         
         .price-card h4 { font-size: 1.5rem; margin-top: 1rem; margin-bottom: 0.5rem; color: var(--navy); }
-        .price-card .price { font-size: 2rem; font-weight: 700; color: var(--gold); margin: 1.5rem 0; }
+        .price-card .price { font-size: 2rem; font-weight: 700; color: var(--gold); margin: 1.5rem 0; margin-bottom: 0.5rem; }
+        
+        /* Promo Banner & Annual Price */
+        .promo-banner { 
+            background: linear-gradient(90deg, #ff4d4d, #f39c12); 
+            color: white; 
+            padding: 12px 30px; 
+            border-radius: 50px; 
+            display: inline-block; 
+            font-weight: 800; 
+            font-size: 1rem; 
+            margin-bottom: 2.5rem; 
+            box-shadow: 0 5px 20px rgba(255, 77, 77, 0.4);
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .annual-price { 
+            display: block;
+            background: #fff0f0; 
+            color: #d63031; 
+            padding: 10px; 
+            border-radius: 8px; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            margin: 1rem 0;
+            border: 1px dashed #ff7675;
+        }
+
         .price-card ul { list-style: none; padding: 0; margin: 2rem 0; text-align: left; font-size: 0.9rem; }
         .price-card ul li { margin-bottom: 10px; }
         .price-card ul li::before { content: '✓'; color: var(--gold); margin-right: 10px; font-weight: bold; }
@@ -116,11 +146,18 @@
 
     <section id="paket" class="pricing">
         <h2>Pilihan Paket LMS Rasyatech</h2>
+        <div class="promo-banner">
+            🔥 Hemat 20% dengan Pembayaran Tahunan (Bayar 10 Bulan, Gratis 2 Bulan!)
+        </div>
         <p>Solusi manajemen digital yang dirancang untuk pertumbuhan sekolah Anda.</p>
         <div class="pricing-grid">
             <div class="price-card silver">
                 <h4>Silver Package</h4>
                 <div class="price">Rp 250.000 <span style="font-size: 1rem; color: #666;">/ Bulan</span></div>
+                <div class="annual-price">
+                    💰 Rp 2.500.000 / Tahun<br>
+                    <span style="font-size: 0.75rem;">(Promo Bayar 10 Bulan)</span>
+                </div>
                 <p style="font-size: 0.85rem; color: #e67e22; font-weight: 600; margin-top: -10px;">Setup: Rp 500.000 (Sekali)</p>
                 <ul>
                     <li><strong>Ideal:</strong> Sekolah Kecil / PKBM</li>
@@ -128,12 +165,16 @@
                     <li><strong>Penyimpanan:</strong> 2GB Cloud Storage</li>
                     <li>Support Email/WA Group</li>
                 </ul>
-                <a href="#daftar" style="display:block; background:var(--navy); color:white; padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Pilih Paket</a>
+                <a href="#daftar" onclick="selectPackage('Silver')" style="display:block; background:var(--navy); color:white; padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Pilih Paket</a>
             </div>
             <div class="price-card gold featured">
                 <div class="badge">Terpopuler</div>
                 <h4>Gold Package</h4>
                 <div class="price">Rp 500.000 <span style="font-size: 1rem; color: #666;">/ Bulan</span></div>
+                <div class="annual-price">
+                    💰 Rp 5.000.000 / Tahun<br>
+                    <span style="font-size: 0.75rem;">(Promo Bayar 10 Bulan)</span>
+                </div>
                 <p style="font-size: 0.85rem; color: #e67e22; font-weight: 600; margin-top: -10px;">Setup: Rp 1.000.000 (Sekali)</p>
                 <ul>
                     <li><strong>Ideal:</strong> SMK / SMA / SMP</li>
@@ -141,11 +182,15 @@
                     <li><strong>Penyimpanan:</strong> 10GB Cloud Storage</li>
                     <li>Prioritas Jam Kerja</li>
                 </ul>
-                <a href="#daftar" style="display:block; background:var(--gold); color:var(--navy); padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Pilih Paket</a>
+                <a href="#daftar" onclick="selectPackage('Gold')" style="display:block; background:var(--gold); color:var(--navy); padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Pilih Paket</a>
             </div>
             <div class="price-card platinum">
                 <h4>Platinum Package</h4>
                 <div class="price">Custom</div>
+                <div class="annual-price" style="background:#f1f2f6; color:#2f3542; border-color:#ced6e0;">
+                    💎 Paket Eksklusif<br>
+                    <span style="font-size: 0.75rem;">Sesuai Kebutuhan Besar</span>
+                </div>
                 <p style="font-size: 0.85rem; color: #e67e22; font-weight: 600; margin-top: -10px;">Setup: Custom Setup</p>
                 <ul>
                     <li><strong>Ideal:</strong> Yayasan / Sekolah Besar</li>
@@ -153,7 +198,7 @@
                     <li><strong>Penyimpanan:</strong> Unlimited / Sesuai Server</li>
                     <li>24/7 + On-Site Support</li>
                 </ul>
-                <a href="#daftar" style="display:block; background:var(--navy); color:white; padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Hubungi Kami</a>
+                <a href="#daftar" onclick="selectPackage('Platinum')" style="display:block; background:var(--navy); color:white; padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Hubungi Kami</a>
             </div>
         </div>
     </section>
@@ -163,6 +208,15 @@
             <h2>Pendaftaran Sekolah Baru</h2>
             <p style="margin-bottom: 2rem; font-size: 0.9rem; color: #666;">Isi data di bawah ini. Akun Admin akan dikirimkan setelah proses verifikasi oleh tim Rasyatech.</p>
             <form id="regForm">
+                <div class="form-group">
+                    <label>Paket yang Diminati</label>
+                    <select name="package" id="packageSelect" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px;" required>
+                        <option value="">-- Pilih Paket --</option>
+                        <option value="Silver (Annual Promo)">Silver Package (Promo Tahunan)</option>
+                        <option value="Gold (Annual Promo)">Gold Package (Promo Tahunan)</option>
+                        <option value="Platinum">Platinum Package</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Nama Sekolah / Instansi</label>
                     <input type="text" name="school_name" required placeholder="Contoh: PKBM Armilla Nusa">
@@ -196,16 +250,31 @@
     </section>
 
     <script>
+        // Helper to select package from cards
+        function selectPackage(pkg) {
+            const select = document.getElementById('packageSelect');
+            if (pkg === 'Silver') select.value = 'Silver (Annual Promo)';
+            else if (pkg === 'Gold') select.value = 'Gold (Annual Promo)';
+            else if (pkg === 'Platinum') select.value = 'Platinum';
+        }
+
         // Handle Form Submission - Redirect to WhatsApp with message
         document.getElementById('regForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
+            const pkg = formData.get('package');
             const school = formData.get('school_name');
             const addr = formData.get('address');
             const email = formData.get('email');
             const pass = formData.get('password');
             
-            const message = `Halo Rasyatech,%0A%0ASaya ingin mendaftarkan sekolah baru:%0A` +
+            let promoText = "";
+            if (pkg.includes("Annual Promo")) {
+                promoText = `Saya tertarik dengan Promo Tahunan Paket ${pkg.split(' ')[0]}.%0A`;
+            }
+
+            const message = `Halo Rasyatech,%0A%0A${promoText}Saya ingin mendaftarkan sekolah baru:%0A` +
+                            `Paket: ${pkg}%0A` +
                             `Nama Sekolah: ${school}%0A` +
                             `Alamat: ${addr}%0A` +
                             `Email Admin: ${email}%0A` +
