@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 
@@ -20,6 +20,7 @@ export default function RasyatechLanding() {
     heroTitle: 'Transformasi Digital Masa Depan', 
     heroSubtitle: 'Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan.' 
   });
+  const [laptops, setLaptops] = useState<any[]>([]);
   const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
@@ -37,9 +38,16 @@ export default function RasyatechLanding() {
       }
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
 
+    // Listen to Laptops
+    const unsubLaptops = onSnapshot(collection(db, 'laptops'), (snap) => {
+      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setLaptops(list);
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'laptops'));
+
     return () => {
       unsubPayments();
       unsubConfig();
+      unsubLaptops();
     };
   }, []);
 
@@ -103,6 +111,7 @@ export default function RasyatechLanding() {
         <div className="nav-links">
           <a href="#about">Tentang</a>
           <a href="#layanan">Layanan</a>
+          <a href="#inventory">Unit Laptop</a>
           <a href="#paket">Paket LMS</a>
           <a href="#daftar" className="btn-daftar">Daftar</a>
           <Link to="/admin" className="btn-login">Portal Admin</Link>
@@ -134,6 +143,58 @@ export default function RasyatechLanding() {
           </div>
         </div>
       </section>
+
+      {laptops.length > 0 && (
+        <section id="inventory" className="inventory-section" style={{ padding: '80px 10%', background: '#fff' }}>
+          <h2 style={{ textAlign: 'center', marginBottom: '10px', color: 'var(--navy)', fontVariant: 'small-caps' }}>Laptop Second Berkualitas</h2>
+          <p style={{ textAlign: 'center', marginBottom: '40px', color: '#666' }}>Dapatkan unit laptop pilihan dengan kondisi prima dan garansi toko dari Rasyacomp.</p>
+          
+          <div className="laptop-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '30px' }}>
+            {laptops.map((laptop) => (
+              <div key={laptop.id} className="laptop-card" style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', border: '1px solid #f1f2f6', transition: 'transform 0.3s' }}>
+                <div style={{ height: '200px', overflow: 'hidden' }}>
+                  <img src={laptop.image || 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&auto=format&fit=crop&q=60'} alt={laptop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div style={{ padding: '25px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--navy)' }}>{laptop.name}</h3>
+                    <span style={{ 
+                      fontSize: '0.7rem', 
+                      padding: '4px 10px', 
+                      borderRadius: '50px', 
+                      fontWeight: 900, 
+                      textTransform: 'uppercase',
+                      background: laptop.isAvailable ? '#e8f7ef' : '#ffebee',
+                      color: laptop.isAvailable ? '#27ae60' : '#e74c3c'
+                    }}>
+                      {laptop.isAvailable ? 'Ready' : 'Sold'}
+                    </span>
+                  </div>
+                  <p style={{ color: 'var(--gold)', fontWeight: 900, fontSize: '1.3rem', margin: '15px 0' }}>{laptop.price}</p>
+                  <a 
+                    href={`https://wa.me/${config.whatsapp || '6281918226387'}?text=Halo%20Rasyatech,%20saya%20tertarik%20dengan%20unit%20laptop%20${laptop.name}%20yang%20seharga%20${laptop.price}. apakah masih tersedia?`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ 
+                      display: 'block', 
+                      textAlign: 'center', 
+                      background: 'var(--navy)', 
+                      color: 'white', 
+                      padding: '12px', 
+                      borderRadius: '10px', 
+                      textDecoration: 'none', 
+                      fontWeight: 700,
+                      marginTop: '20px'
+                    }}
+                  >
+                    Tanya Admin
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section id="paket" className="pricing">
         <h2>Pilihan Paket LMS Rasyatech</h2>
