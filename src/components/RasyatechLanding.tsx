@@ -3,17 +3,34 @@ import { doc, onSnapshot, collection } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 
+const NativeAd = () => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current && containerRef.current.childNodes.length === 0) {
+      const script = document.createElement('script');
+      script.src = "https://pl29415828.profitablecpmratenetwork.com/26c89f0fdb85ab44e206cf5063565f75/invoke.js";
+      script.async = true;
+      script.setAttribute('data-cfasync', 'false');
+      containerRef.current.appendChild(script);
+    }
+  }, []);
+
+  return (
+    <div className="native-ad-wrapper" style={{ padding: '40px 10%', display: 'flex', justifyContent: 'center', background: '#fff' }}>
+      <div ref={containerRef} id="container-26c89f0fdb85ab44e206cf5063565f75" style={{ width: '100%', minHeight: '100px' }}></div>
+    </div>
+  );
+};
+
 const BannerAd = () => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check if script already exists in this container to prevent duplicates
     if (containerRef.current && containerRef.current.childNodes.length === 0) {
-      const script = document.createElement('script');
       const conf = document.createElement('script');
-      
       conf.innerHTML = `
-        atOptions = {
+        window.atOptions = {
           'key' : '3bae6710c4aa9be96222d65a398c7bfc',
           'format' : 'iframe',
           'height' : 90,
@@ -22,6 +39,7 @@ const BannerAd = () => {
         };
       `;
       
+      const script = document.createElement('script');
       script.src = "https://www.highperformanceformat.com/3bae6710c4aa9be96222d65a398c7bfc/invoke.js";
       script.async = true;
 
@@ -32,9 +50,8 @@ const BannerAd = () => {
 
   return (
     <div className="banner-ad-wrapper" style={{ display: 'flex', justifyContent: 'center', margin: '40px 0', width: '100%', overflow: 'hidden' }}>
-      <div ref={containerRef} style={{ width: '728px', height: '90px', background: '#f8f9fa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#ccc' }}>
+      <div ref={containerRef} style={{ width: '728px', minHeight: '90px' }}>
         {/* Ad will load here */}
-        Ad Space (728x90)
       </div>
     </div>
   );
@@ -451,6 +468,8 @@ export default function RasyatechLanding() {
       )}
 
       <BannerAd />
+
+      <NativeAd />
 
       <footer>
         <p><strong>&copy; 2026 Rasyatech</strong></p>
