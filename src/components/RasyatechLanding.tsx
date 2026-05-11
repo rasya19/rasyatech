@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { doc, onSnapshot, collection, setDoc, serverTimestamp, increment, updateDoc, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const NativeAd = () => {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -258,6 +259,63 @@ export default function RasyatechLanding() {
 
   return (
     <div>
+      <Helmet>
+        <title>Rasyatech | Solusi IT & Digitalisasi Sekolah Kuningan</title>
+        <meta name="description" content={config.heroSubtitle || "Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan."} />
+        <meta name="keywords" content="Rasyatech, LMS Sekolah, Jasa Service IT Kuningan, Web Development Kuningan, Digitalisasi Sekolah, Software Manajemen Sekolah" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://rasyatech.my.id/" />
+        <meta property="og:title" content="Rasyatech | Solusi IT & Digitalisasi Sekolah Kuningan" />
+        <meta property="og:description" content={config.heroSubtitle || "Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan."} />
+        <meta property="og:image" content="https://images.unsplash.com/photo-1542744094-3a31f272c490?w=1200&q=80" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://rasyatech.my.id/" />
+        <meta property="twitter:title" content="Rasyatech | Solusi IT & Digitalisasi Sekolah Kuningan" />
+        <meta property="twitter:description" content={config.heroSubtitle || "Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan."} />
+        <meta property="twitter:image" content="https://images.unsplash.com/photo-1542744094-3a31f272c490?w=1200&q=80" />
+
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": "Rasyatech",
+            "description": "Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional.",
+            "url": "https://rasyatech.my.id/",
+            "telephone": config.whatsapp || "+6281918226387",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Mekarwangi",
+              "addressLocality": "Kuningan",
+              "addressRegion": "Jawa Barat",
+              "addressCountry": "ID"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": -7.0006764,
+              "longitude": 108.4908077
+            },
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday"
+              ],
+              "opens": "08:00",
+              "closes": "17:00"
+            }
+          })}
+        </script>
+      </Helmet>
+
       <nav>
         <div className="logo">RASYATECH</div>
         <div className="nav-links" style={{ gap: '25px', display: 'flex', alignItems: 'center' }}>

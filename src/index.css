@@ -23,7 +23,7 @@ nav { background: var(--navy); padding: 1rem 5%; display: flex; justify-content:
 .btn-daftar { background: var(--white); color: var(--navy) !important; padding: 10px 20px; border-radius: 8px; font-weight: 700; margin-left: 25px; transition: 0.3s; }
 
 /* Hero Section */
-.hero { background: linear-gradient(rgba(26, 58, 95, 0.9), rgba(26, 58, 95, 0.9)), url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop'); 
+.hero { background: linear-gradient(rgba(26, 58, 95, 0.9), rgba(26, 58, 95, 0.9)), url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=60&w=1200&auto=format&fit=crop'); 
         background-size: cover; height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; padding: 0 10%; }
 .hero h1 { font-size: 3rem; margin-bottom: 1rem; color: var(--gold); }
 .hero p { font-size: 1.2rem; max-width: 800px; margin-bottom: 2rem; }

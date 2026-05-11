@@ -42,7 +42,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'products' | 'registrations' | 'affiliates' | 'teachers'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'products' | 'registrations' | 'affiliates'>('config');
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingPayments, setSavingPayments] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
@@ -65,7 +65,6 @@ export default function Admin() {
   const [products, setProducts] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [affiliates, setAffiliates] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
   const [visitorCount, setVisitorCount] = useState<number>(0);
   
   // Edit States
@@ -74,7 +73,6 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
   const [editingRegistration, setEditingRegistration] = useState<any>(null);
-  const [editingTeacher, setEditingTeacher] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -131,11 +129,6 @@ export default function Admin() {
       setAffiliates(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'affiliates'));
 
-    // Listen to Teachers
-    const unsubTeachers = onSnapshot(query(collection(db, 'teachers'), orderBy('fullName')), (snap) => {
-      setTeachers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'teachers'));
-
     // Listen to Visitor Count
     const unsubStats = onSnapshot(doc(db, 'stats', 'visitors'), (snap) => {
       if (snap.exists()) {
@@ -152,7 +145,6 @@ export default function Admin() {
       unsubProducts();
       unsubRegistrations();
       unsubAffiliates();
-      unsubTeachers();
       unsubStats();
     };
   }, [user]);
@@ -328,34 +320,6 @@ export default function Admin() {
     }
   };
 
-  const handleDeleteTeacher = async (id: string) => {
-    if (!confirm('Hapus data guru ini?')) return;
-    try {
-      await deleteDoc(doc(db, 'teachers', id));
-    } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `teachers/${id}`);
-    }
-  };
-
-  const handleSaveTeacher = async (e: FormEvent) => {
-    e.preventDefault();
-    const data = editingTeacher;
-    const id = data.id || Math.random().toString(36).substring(7);
-    try {
-      const { id: _, ...payload } = data;
-      await setDoc(doc(db, 'teachers', id), {
-        ...payload,
-        updatedAt: new Date()
-      });
-      setEditingTeacher(null);
-      setSaveStatus({ type: 'success', message: 'Data guru berhasil disimpan!' });
-      setTimeout(() => setSaveStatus(null), 3000);
-    } catch (err) {
-      setSaveStatus({ type: 'error', message: 'Gagal menyimpan data guru.' });
-      handleFirestoreError(err, OperationType.WRITE, `teachers/${id}`);
-    }
-  };
-
   const isAuthorized = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
 
   if (loading) return (
@@ -473,8 +437,7 @@ export default function Admin() {
             { id: 'laptops', label: 'Inventory Laptop', icon: <Package className="w-5 h-5" /> },
             { id: 'products', label: 'Katalog Barang', icon: <Package className="w-5 h-5" /> },
             { id: 'registrations', label: 'Pendaftar', icon: <Users className="w-5 h-5" /> },
-            { id: 'affiliates', label: 'Affiliasi', icon: <Users className="w-5 h-5" /> },
-            { id: 'teachers', label: 'Data Guru', icon: <Users className="w-5 h-5" /> }
+            { id: 'affiliates', label: 'Affiliasi', icon: <Users className="w-5 h-5" /> }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -898,55 +861,6 @@ export default function Admin() {
               </div>
             </motion.div>
           )}
-
-          {/* Teachers Section */}
-          {activeTab === 'teachers' && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-              <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100">
-                <div>
-                  <h2 className="text-3xl font-black">Manajemen Data Guru</h2>
-                  <p className="text-slate-500 font-medium">Kelola profil guru dari berbagai instansi mitra.</p>
-                </div>
-                <button 
-                  onClick={() => setEditingTeacher({ fullName: '', nip: '', email: '', phone: '', password: '', schoolName: '' })}
-                  className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
-                >
-                  <Plus className="w-5 h-5" /> Tambah Guru
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {teachers.map(guru => (
-                  <div key={guru.id} className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                        <Users className="w-7 h-7" />
-                      </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setEditingTeacher(guru)} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Edit2 className="w-4 h-4" /></button>
-                        <button onClick={() => handleDeleteTeacher(guru.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-xl font-black">{guru.fullName}</h4>
-                        <p className="text-xs font-black uppercase tracking-widest text-slate-400">NIP: {guru.nip || '-'}</p>
-                      </div>
-                      <div className="grid grid-cols-1 gap-2 text-sm font-bold text-slate-600">
-                        <div className="flex items-center gap-2"><Settings className="w-4 h-4 text-slate-400" /> {guru.schoolName || 'Umum'}</div>
-                        <div className="flex items-center gap-2"><Users className="w-4 h-4 text-slate-400" /> {guru.email}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {teachers.length === 0 && (
-                  <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
-                    <p className="text-slate-400 font-bold">Belum ada data guru tersimpan.</p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
         </div>
       </div>
 
@@ -1136,47 +1050,6 @@ export default function Admin() {
                 <div className="flex gap-4 pt-4">
                   <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
                   <button type="button" onClick={() => setEditingRegistration(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-
-        {editingTeacher && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingTeacher(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-xl p-12 rounded-[40px] shadow-2xl overflow-y-auto max-h-[90vh]">
-              <h3 className="text-3xl font-black mb-8">{editingTeacher.id ? 'Edit' : 'Tambah'} Data Guru</h3>
-              <form onSubmit={handleSaveTeacher} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Lengkap</label>
-                    <input type="text" required value={editingTeacher.fullName} onChange={e => setEditingTeacher({ ...editingTeacher, fullName: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">NIP / ID Guru</label>
-                    <input type="text" value={editingTeacher.nip} onChange={e => setEditingTeacher({ ...editingTeacher, nip: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Sekolah / Instansi</label>
-                    <input type="text" value={editingTeacher.schoolName} onChange={e => setEditingTeacher({ ...editingTeacher, schoolName: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email</label>
-                    <input type="email" required value={editingTeacher.email} onChange={e => setEditingTeacher({ ...editingTeacher, email: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Telepon</label>
-                    <input type="text" value={editingTeacher.phone} onChange={e => setEditingTeacher({ ...editingTeacher, phone: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Password</label>
-                    <input type="text" required value={editingTeacher.password} onChange={e => setEditingTeacher({ ...editingTeacher, password: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" placeholder="Set password guru" />
-                  </div>
-                </div>
-                <div className="flex gap-4 pt-4">
-                  <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan Data Guru</button>
-                  <button type="button" onClick={() => setEditingTeacher(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
                 </div>
               </form>
             </motion.div>

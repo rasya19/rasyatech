@@ -52,13 +52,6 @@ service cloud.firestore {
              data.image is string && data.image.size() <= 1000;
     }
 
-    function isValidTeacher(data) {
-      return data.keys().hasAll(['fullName', 'email', 'password']) &&
-             data.fullName is string && data.fullName.size() <= 100 &&
-             data.email is string && data.email.size() <= 100 &&
-             data.password is string && data.password.size() <= 100;
-    }
-
     // Collections
     match /settings/config {
       allow read: if true;
@@ -104,11 +97,6 @@ service cloud.firestore {
     match /laptops/{laptopId} {
       allow read: if true;
       allow write: if isVerifiedAdmin() && isValidLaptop(incoming()) && isValidId(laptopId);
-    }
-
-    match /teachers/{teacherId} {
-      allow read: if isVerifiedAdmin();
-      allow write: if isVerifiedAdmin() && isValidTeacher(incoming()) && isValidId(teacherId);
     }
 
     match /admins/{adminId} {
