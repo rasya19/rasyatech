@@ -274,6 +274,15 @@ export default function Admin() {
                     className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold"
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Hero Subtitle</label>
+                  <input 
+                    type="text" 
+                    value={config.heroSubtitle} 
+                    onChange={(e) => setConfig({ ...config, heroSubtitle: e.target.value })}
+                    className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                  />
+                </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Alamat Lengkap</label>
                   <textarea 

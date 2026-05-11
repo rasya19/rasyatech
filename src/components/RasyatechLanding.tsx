@@ -14,6 +14,12 @@ export default function RasyatechLanding() {
     bankMandiriName: 'PT Rasyatech Digital',
     eWalletName: 'Admin Rasyatech'
   });
+  const [config, setConfig] = useState<any>({ 
+    whatsapp: '6281918226387', 
+    address: 'Mekarwangi, Kuningan - Jawa Barat', 
+    heroTitle: 'Transformasi Digital Masa Depan', 
+    heroSubtitle: 'Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan.' 
+  });
   const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
@@ -22,7 +28,15 @@ export default function RasyatechLanding() {
       if (snap.exists()) setPayments(snap.data());
     }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
 
-    return () => unsubPayments();
+    // Listen to Config from Firestore
+    const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
+      if (snap.exists()) setConfig(snap.data());
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
+
+    return () => {
+      unsubPayments();
+      unsubConfig();
+    };
   }, []);
 
   const selectPackage = (pkg: string) => {
@@ -59,7 +73,7 @@ export default function RasyatechLanding() {
                     `Password Request: ${pass}%0A%0A` +
                     `Mohon diproses untuk pembuatan akun admin sekolah kami. Terima kasih.`;
     
-    window.open(`https://wa.me/6281918226387?text=${message}`, '_blank');
+    window.open(`https://wa.me/${config.whatsapp || '6281918226387'}?text=${message}`, '_blank');
     setShowPayment(true);
     setTimeout(() => {
       document.getElementById('payment')?.scrollIntoView({ behavior: 'smooth' });
@@ -86,8 +100,8 @@ export default function RasyatechLanding() {
       </nav>
 
       <section className="hero">
-        <h1>Transformasi Digital Masa Depan</h1>
-        <p>Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan.</p>
+        <h1>{config.heroTitle || 'Transformasi Digital Masa Depan'}</h1>
+        <p>{config.heroSubtitle || 'Solusi Manajemen Sekolah (LMS) Terintegrasi, Jasa Service IT, dan Web Development Profesional berbasis di Mekarwangi, Kuningan.'}</p>
         <div>
           <a href="#layanan" style={{ background: 'var(--gold)', color: 'var(--navy)', padding: '15px 30px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>Eksplorasi Layanan</a>
         </div>
@@ -245,7 +259,7 @@ export default function RasyatechLanding() {
 
         <div style={{ marginTop: '3rem', padding: '2rem', borderRadius: '10px', background: '#fff9e6', border: '1px solid #ffeaa7' }}>
           <p><strong>Setelah Transfer:</strong> Kirim Bukti Pembayaran ke WhatsApp Admin kami untuk percepatan aktivasi server sekolah Anda.</p>
-          <a href="https://wa.me/6281918226387?text=Konfirmasi%20Pembayaran%20Rasyatech" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: '#27ae60', color: 'white', padding: '10px 20px', borderRadius: '5px', textDecoration: 'none', fontWeight: 700 }}>Konfirmasi Via WhatsApp</a>
+          <a href={`https://wa.me/${config.whatsapp || '6281918226387'}?text=Konfirmasi%20Pembayaran%20Rasyatech`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '10px', background: '#27ae60', color: 'white', padding: '10px 20px', borderRadius: '5px', textDecoration: 'none', fontWeight: 700 }}>Konfirmasi Via WhatsApp</a>
         </div>
       </section>
 
@@ -263,8 +277,8 @@ export default function RasyatechLanding() {
       <footer>
         <p><strong>&copy; 2026 Rasyatech by Rasyacomp</strong></p>
         <div className="contact-info">
-          📍 Mekarwangi, Kuningan - Jawa Barat<br />
-          📱 WhatsApp: <a href="https://wa.me/6281918226387" style={{ color: 'white', textDecoration: 'none' }}>081918226387</a> | ✉ Email: ismanto095@gmail.com
+          📍 {config.address || 'Mekarwangi, Kuningan - Jawa Barat'}<br />
+          📱 WhatsApp: <a href={`https://wa.me/${config.whatsapp || '6281918226387'}`} style={{ color: 'white', textDecoration: 'none' }}>{config.whatsapp || '081918226387'}</a> | ✉ Email: ismanto095@gmail.com
         </div>
       </footer>
     </div>
