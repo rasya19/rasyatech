@@ -35,7 +35,38 @@
 
         /* Portfolio */
         .portfolio { padding: 5rem 10%; text-align: center; }
-        .client-logo { background: #eee; padding: 20px; display: inline-block; border-radius: 8px; font-weight: bold; color: var(--navy); }
+        .mitra-grid { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-top: 2rem; }
+        .client-logo { background: #eee; padding: 20px; display: inline-block; border-radius: 8px; font-weight: bold; color: var(--navy); min-width: 200px; }
+
+        /* Pricing Section */
+        .pricing { padding: 5rem 10%; background: var(--white); text-align: center; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .price-card { border: 1px solid #eee; padding: 2.5rem; border-radius: 15px; transition: 0.3s; position: relative; overflow: hidden; background: white; }
+        .price-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; }
+        .price-card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        /* Package Variations */
+        .price-card.silver::before { background: linear-gradient(90deg, #bdc3c7, #2c3e50); }
+        .price-card.gold::before { background: linear-gradient(90deg, #d4af37, #f1c40f); }
+        .price-card.platinum::before { background: linear-gradient(90deg, #2c3e50, #000000); }
+        
+        .price-card.featured { border: 2px solid var(--navy); }
+        .price-card.featured .badge { background: var(--gold); color: var(--navy); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; position: absolute; top: 10px; right: 10px; }
+        
+        .price-card h4 { font-size: 1.5rem; margin-top: 1rem; margin-bottom: 0.5rem; color: var(--navy); }
+        .price-card .price { font-size: 2rem; font-weight: 700; color: var(--gold); margin: 1.5rem 0; }
+        .price-card ul { list-style: none; padding: 0; margin: 2rem 0; text-align: left; font-size: 0.9rem; }
+        .price-card ul li { margin-bottom: 10px; }
+        .price-card ul li::before { content: '✓'; color: var(--gold); margin-right: 10px; font-weight: bold; }
+
+        /* Registration Form */
+        .registration { padding: 5rem 10%; background: var(--light-gray); }
+        .form-container { max-width: 600px; margin: 0 auto; background: white; padding: 3rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 1.5rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn-submit { background: var(--navy); color: white; border: none; width: 100%; padding: 15px; border-radius: 5px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-submit:hover { background: #2a5a8f; }
 
         /* Footer */
         footer { background: var(--navy); color: white; padding: 3rem 10%; text-align: center; }
@@ -51,7 +82,8 @@
         <div class="nav-links">
             <a href="#about">Tentang</a>
             <a href="#layanan">Layanan</a>
-            <a href="https://wa.me/6285224025555" target="_blank" rel="noopener noreferrer" class="btn-daftar">Daftar</a>
+            <a href="#paket">Paket LMS</a>
+            <a href="#daftar" class="btn-daftar">Daftar</a>
             <a href="https://rasyatech.rsch.my.id/super-admin" target="_blank" rel="noopener noreferrer" class="btn-login">Portal Admin</a>
         </div>
     </nav>
@@ -82,11 +114,107 @@
         </div>
     </section>
 
-    <section class="portfolio">
-        <h2>Klien Terpercaya</h2>
-        <div class="client-logo">PKBM ARMILLA NUSA</div>
-        <p style="margin-top: 1rem; color: #666;">Telah menggunakan sistem LMS Rasyatech untuk manajemen sekolah mereka.</p>
+    <section id="paket" class="pricing">
+        <h2>Pilihan Paket LMS Rasyatech</h2>
+        <p>Solusi manajemen digital yang dirancang untuk pertumbuhan sekolah Anda.</p>
+        <div class="pricing-grid">
+            <div class="price-card silver">
+                <h4>Silver Package</h4>
+                <div class="price">Rp 250.000 <span style="font-size: 1rem; color: #666;">/ Bulan</span></div>
+                <p style="font-size: 0.85rem; color: #e67e22; font-weight: 600; margin-top: -10px;">Setup: Rp 500.000 (Sekali)</p>
+                <ul>
+                    <li><strong>Ideal:</strong> Sekolah Kecil / PKBM</li>
+                    <li><strong>Domain:</strong> Subdomain (.rsch.my.id)</li>
+                    <li><strong>Penyimpanan:</strong> 2GB Cloud Storage</li>
+                    <li>Support Email/WA Group</li>
+                </ul>
+                <a href="#daftar" style="display:block; background:var(--navy); color:white; padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Pilih Paket</a>
+            </div>
+            <div class="price-card gold featured">
+                <div class="badge">Terpopuler</div>
+                <h4>Gold Package</h4>
+                <div class="price">Rp 500.000 <span style="font-size: 1rem; color: #666;">/ Bulan</span></div>
+                <p style="font-size: 0.85rem; color: #e67e22; font-weight: 600; margin-top: -10px;">Setup: Rp 1.000.000 (Sekali)</p>
+                <ul>
+                    <li><strong>Ideal:</strong> SMK / SMA / SMP</li>
+                    <li><strong>Domain:</strong> Subdomain (.rsch.my.id)</li>
+                    <li><strong>Penyimpanan:</strong> 10GB Cloud Storage</li>
+                    <li>Prioritas Jam Kerja</li>
+                </ul>
+                <a href="#daftar" style="display:block; background:var(--gold); color:var(--navy); padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Pilih Paket</a>
+            </div>
+            <div class="price-card platinum">
+                <h4>Platinum Package</h4>
+                <div class="price">Custom</div>
+                <p style="font-size: 0.85rem; color: #e67e22; font-weight: 600; margin-top: -10px;">Setup: Custom Setup</p>
+                <ul>
+                    <li><strong>Ideal:</strong> Yayasan / Sekolah Besar</li>
+                    <li><strong>Domain:</strong> Custom Domain (.sch.id)</li>
+                    <li><strong>Penyimpanan:</strong> Unlimited / Sesuai Server</li>
+                    <li>24/7 + On-Site Support</li>
+                </ul>
+                <a href="#daftar" style="display:block; background:var(--navy); color:white; padding:12px; border-radius:5px; text-decoration:none; font-weight:700;">Hubungi Kami</a>
+            </div>
+        </div>
     </section>
+
+    <section id="daftar" class="registration">
+        <div class="form-container">
+            <h2>Pendaftaran Sekolah Baru</h2>
+            <p style="margin-bottom: 2rem; font-size: 0.9rem; color: #666;">Isi data di bawah ini. Akun Admin akan dikirimkan setelah proses verifikasi oleh tim Rasyatech.</p>
+            <form id="regForm">
+                <div class="form-group">
+                    <label>Nama Sekolah / Instansi</label>
+                    <input type="text" name="school_name" required placeholder="Contoh: PKBM Armilla Nusa">
+                </div>
+                <div class="form-group">
+                    <label>Alamat Sekolah</label>
+                    <input type="text" name="address" required placeholder="Contoh: Mekarwangi, Kuningan">
+                </div>
+                <div class="form-group">
+                    <label>Email Utama (Admin)</label>
+                    <input type="email" name="email" required placeholder="Contoh: admin@sekolah.sch.id">
+                </div>
+                <div class="form-group">
+                    <label>Password Admin (Nantinya)</label>
+                    <input type="password" name="password" required placeholder="Min. 8 Karakter">
+                </div>
+                <button type="submit" class="btn-submit">Kirim Pendaftaran</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="portfolio">
+        <h2>Mitra Strategis & Klien</h2>
+        <div class="mitra-grid">
+            <div class="client-logo">PKBM ARMILLA NUSA</div>
+            <div class="client-logo">MITRA AFFILIASI</div>
+        </div>
+        <p style="margin-top: 2rem; color: #666; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Membangun ekosistem pendidikan digital yang inklusif bersama mitra terpercaya di seluruh daerah.
+        </p>
+    </section>
+
+    <script>
+        // Handle Form Submission - Redirect to WhatsApp with message
+        document.getElementById('regForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const school = formData.get('school_name');
+            const addr = formData.get('address');
+            const email = formData.get('email');
+            const pass = formData.get('password');
+            
+            const message = `Halo Rasyatech,%0A%0ASaya ingin mendaftarkan sekolah baru:%0A` +
+                            `Nama Sekolah: ${school}%0A` +
+                            `Alamat: ${addr}%0A` +
+                            `Email Admin: ${email}%0A` +
+                            `Password Request: ${pass}%0A%0A` +
+                            `Mohon diproses untuk pembuatan akun admin sekolah kami. Terima kasih.`;
+            
+            window.open(`https://wa.me/081918226387?text=${message}`, '_blank');
+        });
+    </script>
 
     <footer>
         <p><strong>&copy; 2026 Rasyatech by Rasyacomp</strong></p>
