@@ -39,12 +39,16 @@ export default function RasyatechLanding() {
     };
   }, []);
 
-  const selectPackage = (pkg: string) => {
+  const selectPackage = (pkg: string, type: 'Annual' | 'Monthly' = 'Annual') => {
     const select = document.getElementById('packageSelect') as HTMLSelectElement;
     if (select) {
-      if (pkg === 'Silver') select.value = 'Silver (Annual Promo)';
-      else if (pkg === 'Gold') select.value = 'Gold (Annual Promo)';
-      else if (pkg === 'Platinum') select.value = 'Platinum';
+      if (pkg === 'Silver') {
+        select.value = type === 'Annual' ? 'Silver (Annual Promo)' : 'Silver Monthly';
+      } else if (pkg === 'Gold') {
+        select.value = type === 'Annual' ? 'Gold (Annual Promo)' : 'Gold Monthly';
+      } else if (pkg === 'Platinum') {
+        select.value = 'Platinum';
+      }
       
       const daftarSection = document.getElementById('daftar');
       daftarSection?.scrollIntoView({ behavior: 'smooth' });
@@ -63,6 +67,8 @@ export default function RasyatechLanding() {
     let promoText = "";
     if (pkg.includes("Annual Promo")) {
         promoText = `Saya tertarik dengan Promo Tahunan Paket ${pkg.split(' ')[0]}.%0A`;
+    } else if (pkg.includes("Monthly")) {
+        promoText = `Saya tertarik dengan Paket Bulanan ${pkg.split(' ')[0]}.%0A`;
     }
 
     const message = `Halo Rasyatech,%0A%0A${promoText}Saya ingin mendaftarkan sekolah baru:%0A` +
@@ -148,7 +154,8 @@ export default function RasyatechLanding() {
               <li><strong>Penyimpanan:</strong> 2GB Cloud Storage</li>
               <li>Support Email/WA Group</li>
             </ul>
-            <button onClick={() => selectPackage('Silver')} style={{ display: 'block', width: '100%', background: 'var(--navy)', color: 'white', padding: '12px', borderRadius: '5px', fontWeight: 700 }}>Pilih Paket</button>
+            <button onClick={() => selectPackage('Silver', 'Annual')} style={{ display: 'block', width: '100%', background: 'var(--navy)', color: 'white', padding: '12px', borderRadius: '5px', fontWeight: 700 }}>Pilih Tahunan</button>
+            <button onClick={() => selectPackage('Silver', 'Monthly')} style={{ display: 'block', width: '100%', background: 'transparent', color: 'var(--navy)', padding: '10px', borderRadius: '5px', fontWeight: 600, border: '1px solid var(--navy)', marginTop: '10px', fontSize: '0.9rem' }}>Pilih Bulanan</button>
           </div>
           <div className="price-card gold featured">
             <div className="badge">Terpopuler</div>
@@ -165,7 +172,8 @@ export default function RasyatechLanding() {
               <li><strong>Penyimpanan:</strong> 10GB Cloud Storage</li>
               <li>Prioritas Jam Kerja</li>
             </ul>
-            <button onClick={() => selectPackage('Gold')} style={{ display: 'block', width: '100%', background: 'var(--gold)', color: 'var(--navy)', padding: '12px', borderRadius: '5px', fontWeight: 700 }}>Pilih Paket</button>
+            <button onClick={() => selectPackage('Gold', 'Annual')} style={{ display: 'block', width: '100%', background: 'var(--gold)', color: 'var(--navy)', padding: '12px', borderRadius: '5px', fontWeight: 700 }}>Pilih Tahunan</button>
+            <button onClick={() => selectPackage('Gold', 'Monthly')} style={{ display: 'block', width: '100%', background: 'transparent', color: 'var(--navy)', padding: '10px', borderRadius: '5px', fontWeight: 600, border: '1px solid var(--navy)', marginTop: '10px', fontSize: '0.9rem' }}>Pilih Bulanan</button>
           </div>
           <div className="price-card platinum">
             <h4>Platinum Package</h4>
@@ -195,9 +203,11 @@ export default function RasyatechLanding() {
               <label>Paket yang Diminati</label>
               <select name="package" id="packageSelect" required>
                 <option value="">-- Pilih Paket --</option>
-                <option value="Silver (Annual Promo)">Silver Package (Promo Tahunan)</option>
-                <option value="Gold (Annual Promo)">Gold Package (Promo Tahunan)</option>
-                <option value="Platinum">Platinum Package</option>
+                <option value="Silver Monthly">Silver Package (Bulanan - Rp 250k)</option>
+                <option value="Silver (Annual Promo)">Silver Package (Promo Tahunan - Rp 2.5jt)</option>
+                <option value="Gold Monthly">Gold Package (Bulanan - Rp 500k)</option>
+                <option value="Gold (Annual Promo)">Gold Package (Promo Tahunan - Rp 5jt)</option>
+                <option value="Platinum">Platinum Package (Custom)</option>
               </select>
             </div>
             <div className="form-group">

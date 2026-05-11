@@ -44,6 +44,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments'>('config');
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingPayments, setSavingPayments] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   
   // Data States
   const [config, setConfig] = useState<any>({ whatsapp: '', address: '', openingHours: '', heroTitle: '', heroSubtitle: '' });
@@ -114,10 +115,13 @@ export default function Admin() {
   const handleSaveConfig = async (e: FormEvent) => {
     e.preventDefault();
     setSavingConfig(true);
+    setSaveStatus(null);
     try {
       await setDoc(doc(db, 'settings', 'config'), config);
-      alert('Konfigurasi berhasil disimpan!');
+      setSaveStatus({ type: 'success', message: 'Konfigurasi website berhasil disimpan!' });
+      setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
+      setSaveStatus({ type: 'error', message: 'Gagal menyimpan konfigurasi.' });
       handleFirestoreError(err, OperationType.WRITE, 'settings/config');
     } finally {
       setSavingConfig(false);
@@ -127,10 +131,13 @@ export default function Admin() {
   const handleSavePayments = async (e: FormEvent) => {
     e.preventDefault();
     setSavingPayments(true);
+    setSaveStatus(null);
     try {
       await setDoc(doc(db, 'settings', 'payments'), payments);
-      alert('Konfigurasi pembayaran berhasil disimpan!');
+      setSaveStatus({ type: 'success', message: 'Konfigurasi pembayaran berhasil disimpan!' });
+      setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
+      setSaveStatus({ type: 'error', message: 'Gagal menyimpan konfigurasi pembayaran.' });
       handleFirestoreError(err, OperationType.WRITE, 'settings/payments');
     } finally {
       setSavingPayments(false);
@@ -239,6 +246,22 @@ export default function Admin() {
 
       <div className="max-w-7xl mx-auto px-10 pt-12">
         {/* Tabs */}
+        <AnimatePresence>
+          {saveStatus && (
+            <motion.div 
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-bold ${
+                saveStatus.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+              }`}
+            >
+              {saveStatus.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+              {saveStatus.message}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div className="flex flex-wrap gap-4 mb-12">
           {[
             { id: 'config', label: 'Konfigurasi', icon: <Settings className="w-5 h-5" /> },
@@ -282,13 +305,13 @@ export default function Admin() {
                     className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Hero Subtitle</label>
-                  <input 
-                    type="text" 
+                  <textarea 
                     value={config.heroSubtitle} 
                     onChange={(e) => setConfig({ ...config, heroSubtitle: e.target.value })}
-                    className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold"
+                    className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold h-24"
+                    placeholder="Deskripsi singkat di bawah judul utama"
                   />
                 </div>
                 <div className="md:col-span-2 space-y-2">

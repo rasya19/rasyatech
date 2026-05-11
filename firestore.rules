@@ -31,14 +31,11 @@ service cloud.firestore {
 
     // Entity Validations
     function isValidConfig(data) {
-      return data.keys().hasAll(['whatsapp', 'address']) &&
-             data.whatsapp is string &&
-             data.address is string;
+      return data.keys().hasAll(['whatsapp', 'address']);
     }
 
     function isValidPayments(data) {
-      return data.keys().hasAll(['eWallet', 'eWalletName']) &&
-             data.eWallet is string;
+      return data.keys().hasAll(['eWallet', 'eWalletName']);
     }
 
     function isValidService(data) {
