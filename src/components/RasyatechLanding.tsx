@@ -77,6 +77,7 @@ export default function RasyatechLanding() {
   const [laptops, setLaptops] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [affiliates, setAffiliates] = useState<any[]>([]);
   const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
@@ -112,12 +113,19 @@ export default function RasyatechLanding() {
       setProducts(list);
     }, (err) => handleFirestoreError(err, OperationType.GET, 'products'));
 
+    // Listen to Affiliates
+    const unsubAffiliates = onSnapshot(collection(db, 'affiliates'), (snap) => {
+      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAffiliates(list);
+    }, (err) => handleFirestoreError(err, OperationType.GET, 'affiliates'));
+
     return () => {
       unsubPayments();
       unsubConfig();
       unsubLaptops();
       unsubAds();
       unsubProducts();
+      unsubAffiliates();
     };
   }, []);
 
@@ -498,9 +506,21 @@ export default function RasyatechLanding() {
 
       <section className="portfolio">
         <h2>Mitra Strategis & Klien</h2>
-        <div className="mitra-grid">
+        <div className="mitra-grid" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '30px', alignItems: 'center', marginTop: '40px' }}>
           <div className="client-logo">PKBM ARMILLA NUSA</div>
-          <div className="client-logo">MITRA AFFILIASI</div>
+          {affiliates.map(af => (
+            <a 
+              key={af.id} 
+              href={af.website || '#'} 
+              target={af.website ? "_blank" : "_self"} 
+              rel="noopener noreferrer"
+              className="client-logo"
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
+            >
+              <img src={af.logo} alt={af.name} style={{ height: '50px', objectFit: 'contain', marginBottom: '10px' }} />
+              <div style={{ fontSize: '0.8rem', fontWeight: 700 }}>{af.name}</div>
+            </a>
+          ))}
         </div>
         <p style={{ marginTop: '2rem', color: '#666', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
           Membangun ekosistem pendidikan digital yang inklusif bersama mitra terpercaya di seluruh daerah.

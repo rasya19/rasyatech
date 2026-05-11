@@ -42,7 +42,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'products' | 'registrations'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'products' | 'registrations' | 'affiliates'>('config');
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingPayments, setSavingPayments] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
@@ -64,11 +64,13 @@ export default function Admin() {
   const [ads, setAds] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
+  const [affiliates, setAffiliates] = useState<any[]>([]);
   
   // Edit States
   const [editingService, setEditingService] = useState<any>(null);
   const [editingLaptop, setEditingLaptop] = useState<any>(null);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -120,6 +122,11 @@ export default function Admin() {
       setRegistrations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'registrations'));
 
+    // Listen to Affiliates
+    const unsubAffiliates = onSnapshot(query(collection(db, 'affiliates'), orderBy('name')), (snap) => {
+      setAffiliates(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'affiliates'));
+
     return () => {
       unsubConfig();
       unsubPayments();
@@ -128,6 +135,7 @@ export default function Admin() {
       unsubAds();
       unsubProducts();
       unsubRegistrations();
+      unsubAffiliates();
     };
   }, [user]);
 
@@ -263,6 +271,28 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteAffiliate = async (id: string) => {
+    if (!confirm('Hapus mitra affiliasi ini?')) return;
+    try {
+      await deleteDoc(doc(db, 'affiliates', id));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `affiliates/${id}`);
+    }
+  };
+
+  const handleSaveAffiliate = async (e: FormEvent) => {
+    e.preventDefault();
+    const data = editingAffiliate;
+    const id = data.id || Math.random().toString(36).substring(7);
+    try {
+      const { id: _, ...payload } = data;
+      await setDoc(doc(db, 'affiliates', id), payload);
+      setEditingAffiliate(null);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `affiliates/${id}`);
+    }
+  };
+
   const isAuthorized = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
 
   if (loading) return (
@@ -359,7 +389,8 @@ export default function Admin() {
             { id: 'services', label: 'Layanan', icon: <Monitor className="w-5 h-5" /> },
             { id: 'laptops', label: 'Inventory Laptop', icon: <Package className="w-5 h-5" /> },
             { id: 'products', label: 'Katalog Barang', icon: <Package className="w-5 h-5" /> },
-            { id: 'registrations', label: 'Pendaftar', icon: <Users className="w-5 h-5" /> }
+            { id: 'registrations', label: 'Pendaftar', icon: <Users className="w-5 h-5" /> },
+            { id: 'affiliates', label: 'Affiliasi', icon: <Users className="w-5 h-5" /> }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -717,6 +748,42 @@ export default function Admin() {
               </div>
             </motion.div>
           )}
+
+          {/* Affiliates Section */}
+          {activeTab === 'affiliates' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+              <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100">
+                <h2 className="text-3xl font-black">Manajemen Affiliasi</h2>
+                <button 
+                  onClick={() => setEditingAffiliate({ name: '', logo: '', website: '' })}
+                  className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
+                >
+                  <Plus className="w-5 h-5" /> Tambah Mitra
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {affiliates.map(af => (
+                  <div key={af.id} className="bg-white rounded-[32px] border border-slate-100 p-6 flex flex-col items-center text-center group">
+                    <div className="w-24 h-24 rounded-2xl overflow-hidden mb-4 bg-slate-50 p-2 border border-slate-100">
+                      <img src={af.logo} alt={af.name} className="w-full h-full object-contain" />
+                    </div>
+                    <h4 className="font-black text-lg mb-1">{af.name}</h4>
+                    <p className="text-slate-400 text-xs mb-6 truncate w-full px-4">{af.website}</p>
+                    <div className="flex gap-2 w-full">
+                      <button onClick={() => setEditingAffiliate(af)} className="flex-1 py-3 bg-slate-50 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-100 transition-colors flex items-center justify-center gap-2"><Edit2 className="w-4 h-4" /> Edit</button>
+                      <button onClick={() => handleDeleteAffiliate(af.id)} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                ))}
+                {affiliates.length === 0 && (
+                  <div className="col-span-full py-20 text-center bg-white rounded-[40px] border-2 border-dashed border-slate-100">
+                    <p className="text-slate-400 font-bold">Belum ada mitra affiliasi.</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -813,6 +880,33 @@ export default function Admin() {
                 <div className="flex gap-4 pt-4">
                   <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
                   <button type="button" onClick={() => setEditingProduct(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+
+        {editingAffiliate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingAffiliate(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-xl p-12 rounded-[40px] shadow-2xl">
+              <h3 className="text-3xl font-black mb-8">{editingAffiliate.id ? 'Edit' : 'Tambah'} Mitra Affiliasi</h3>
+              <form onSubmit={handleSaveAffiliate} className="space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Mitra</label>
+                  <input type="text" required value={editingAffiliate.name} onChange={e => setEditingAffiliate({ ...editingAffiliate, name: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Logo URL</label>
+                  <input type="text" required value={editingAffiliate.logo} onChange={e => setEditingAffiliate({ ...editingAffiliate, logo: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Website URL (Opsional)</label>
+                  <input type="text" value={editingAffiliate.website} onChange={e => setEditingAffiliate({ ...editingAffiliate, website: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" placeholder="https://..." />
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Simpan</button>
+                  <button type="button" onClick={() => setEditingAffiliate(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
                 </div>
               </form>
             </motion.div>

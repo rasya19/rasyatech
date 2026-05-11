@@ -78,6 +78,11 @@ service cloud.firestore {
       allow write: if true; // Allow public registration
     }
 
+    match /affiliates/{affiliateId} {
+      allow read: if true;
+      allow write: if isVerifiedAdmin() && isValidId(affiliateId);
+    }
+
     match /services/{serviceId} {
       allow read: if true;
       allow write: if isVerifiedAdmin() && isValidService(incoming()) && isValidId(serviceId);
