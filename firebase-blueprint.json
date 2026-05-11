@@ -39,6 +39,21 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "price", "image"]
+    },
+    "Teacher": {
+      "title": "Teacher Profile",
+      "description": "A teacher profile for partner institutions.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "nip": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "password": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "email", "password"]
     }
   },
   "firestore": {
@@ -53,6 +68,10 @@
     "laptops/{laptopId}": {
       "schema": "Laptop",
       "description": "Laptop inventory"
+    },
+    "teachers/{teacherId}": {
+      "schema": "Teacher",
+      "description": "Teacher profiles"
     }
   }
 }
