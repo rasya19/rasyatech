@@ -754,7 +754,7 @@ export default function Admin() {
                   <p className="text-slate-500 font-medium">Kelola pendaftaran sekolah baru dari landing page.</p>
                 </div>
                 <button 
-                  onClick={() => setEditingRegistration({ schoolName: '', package: 'Bronze', email: '', address: '', status: 'verified', affiliateEmail: '', commission: 0 })}
+                  onClick={() => setEditingRegistration({ schoolName: '', package: 'Silver Monthly', email: '', address: '', status: 'verified', affiliateEmail: '', commission: 0 })}
                   className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
                 >
                   <Plus className="w-5 h-5" /> Tambah Pendaftar
@@ -1035,12 +1035,11 @@ export default function Admin() {
                   <div>
                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Paket</label>
                     <select value={editingRegistration.package} onChange={e => setEditingRegistration({ ...editingRegistration, package: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold">
-                      <option>Bronze (Bulanan)</option>
-                      <option>Silver (Bulanan)</option>
-                      <option>Gold (Bulanan)</option>
-                      <option>Bronze (Annual Promo)</option>
-                      <option>Silver (Annual Promo)</option>
-                      <option>Gold (Annual Promo)</option>
+                      <option value="Silver Monthly">Silver (Bulanan)</option>
+                      <option value="Gold Monthly">Gold (Bulanan)</option>
+                      <option value="Platinum">Platinum (Custom)</option>
+                      <option value="Silver (Annual Promo)">Silver (Annual Promo)</option>
+                      <option value="Gold (Annual Promo)">Gold (Annual Promo)</option>
                     </select>
                   </div>
                 </div>
