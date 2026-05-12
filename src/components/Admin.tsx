@@ -75,7 +75,19 @@ export default function Admin() {
   const [editingRegistration, setEditingRegistration] = useState<any>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      if (u) {
+        const isSuperAdmin = u.email?.toLowerCase() === 'ismanto095@gmail.com';
+        if (!isSuperAdmin) {
+          // If not super admin, check if they are a school admin in the registrations or a different portal
+          // For now, as per request: "HANYA boleh diakses oleh email: ismanto095@gmail.com"
+          // We will logout and redirect
+          alert('Akses Ditolak: Anda tidak memiliki wewenang untuk mengakses Admin Pusat.');
+          await signOut(auth);
+          window.location.href = '/';
+          return;
+        }
+      }
       setUser(u);
       setLoading(false);
     });
@@ -321,6 +333,11 @@ export default function Admin() {
   };
 
   const isAuthorized = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
+  
+  // If authorized but somehow reach here with wrong email (belt and suspenders)
+  if (user && !isAuthorized) {
+    return null;
+  }
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
