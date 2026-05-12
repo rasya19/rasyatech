@@ -126,6 +126,11 @@ service cloud.firestore {
       allow write: if isSuperAdmin() && isValidLaptop(incoming()) && isValidId(laptopId);
     }
 
+    match /users/{userId} {
+      allow read: if isSuperAdmin() || (isSignedIn() && request.auth.token.email.lower() == userId.lower());
+      allow write: if isSuperAdmin();
+    }
+
     match /admins/{adminId} {
       allow read: if isSignedIn() && (request.auth.uid == adminId || isSuperAdmin());
       allow write: if false; // Managed via Firebase Console or special script

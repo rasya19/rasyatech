@@ -332,6 +332,29 @@ export default function Admin() {
     }
   };
 
+  const handleSeedDemoData = async () => {
+    if (!confirm('Yakin ingin melakukan seeding data demo? Ini akan membuat/memperbarui 3 akun demo (Silver, Gold, Platinum).')) return;
+    try {
+      const demoAccounts = [
+        { email: 'silver@demo.com', plan: 'silver', name: 'User Silver', data: { tasks: [{ title: 'Belajar Dasar', status: 'done' }] } },
+        { email: 'gold@demo.com', plan: 'gold', name: 'User Gold', data: { finance: { balance: 1000 }, reports: [{ date: '2026-05-12' }] } },
+        { email: 'platinum@demo.com', plan: 'platinum', name: 'User Platinum', data: { stats: { views: 999 }, qr: 'https://qr.example.com', theme: 'black-gold' } }
+      ];
+      
+      for (const acc of demoAccounts) {
+        await setDoc(doc(db, 'users', acc.email), {
+          ...acc,
+          updatedAt: new Date()
+        });
+      }
+      setSaveStatus({ type: 'success', message: 'Data demo 3 akun berhasil dibuat!' });
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch (err) {
+      setSaveStatus({ type: 'error', message: 'Gagal seeding data.' });
+      handleFirestoreError(err, OperationType.WRITE, 'users/seed');
+    }
+  };
+
   const isAuthorized = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
   
   // If authorized but somehow reach here with wrong email (belt and suspenders)
@@ -517,6 +540,13 @@ export default function Admin() {
                   >
                     {savingConfig ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                     {savingConfig ? 'Menyimpan...' : 'Simpan Perubahan'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSeedDemoData}
+                    className="mt-6 px-10 py-5 bg-purple-600 text-white font-black rounded-2xl shadow-xl shadow-purple-100 flex items-center gap-3 hover:bg-purple-700 transition-all"
+                  >
+                    🚀 Automated Demo Seeding
                   </button>
                 </div>
               </form>
