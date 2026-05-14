@@ -990,7 +990,7 @@ export default function Admin() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setVerifyingReg(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-lg p-10 rounded-[40px] shadow-2xl">
               <h3 className="text-2xl font-black mb-4">Verifikasi {verifyingReg.school_name}</h3>
-              <p className="text-slate-500 mb-6 font-medium">Masukkan subdomain yang diinginkan (cth: sekolah1 -> sekolah1.rasyatech.rsch.my.id)</p>
+              <p className="text-slate-500 mb-6 font-medium">Masukkan subdomain yang diinginkan (cth: sekolah1 to sekolah1.rasyatech.rsch.my.id)</p>
               <form onSubmit={(e) => { e.preventDefault(); handleVerifySchool(); }} className="space-y-6">
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Subdomain Prefix</label>

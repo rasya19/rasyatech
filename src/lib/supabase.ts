@@ -9,7 +9,7 @@ const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 console.log("Supabase Debug - All Env Variables:", import.meta.env);
 
 // Helper to check configuration
-const isConfigured = supabaseUrl && supabaseKey && supabaseUrl !== 'undefined';
+const isConfigured = supabaseUrl && supabaseKey;
 
 if (!isConfigured) {
   console.error(
