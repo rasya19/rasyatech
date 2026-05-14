@@ -14,6 +14,7 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(cors());
+  app.options('*', cors());
   app.use(express.json());
 
   // Setup nodemailer transporter
