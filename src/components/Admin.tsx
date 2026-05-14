@@ -1,23 +1,4 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  onAuthStateChanged, 
-  signOut,
-  User
-} from 'firebase/auth';
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  setDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  orderBy,
-  onSnapshot
-} from 'firebase/firestore';
-import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { supabase } from '../lib/supabase';
 import { 
   Save, 
@@ -41,7 +22,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Admin() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'config' | 'services' | 'laptops' | 'payments' | 'products' | 'registrations' | 'affiliates'>('config');
   const [savingConfig, setSavingConfig] = useState(false);
@@ -76,86 +57,77 @@ export default function Admin() {
   const [editingRegistration, setEditingRegistration] = useState<any>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (u) => {
-      if (u) {
-        const isSuperAdmin = u.email?.toLowerCase() === 'ismanto095@gmail.com';
-        if (!isSuperAdmin) {
-          // If not super admin, check if they are a school admin in the registrations or a different portal
-          // For now, as per request: "HANYA boleh diakses oleh email: ismanto095@gmail.com"
-          // We will logout and redirect
-          alert('Akses Ditolak: Anda tidak memiliki wewenang untuk mengakses Admin Pusat.');
-          await signOut(auth);
-          window.location.href = '/';
-          return;
-        }
-      }
-      setUser(u);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setLoading(false);
     });
-    return () => unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!user) return;
 
-    // Listen to Config
-    const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
-      if (snap.exists()) {
-        setConfig((prev: any) => ({ ...prev, ...snap.data() }));
-      }
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
+    // // Listen to Config
+    // const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
+    //   if (snap.exists()) {
+    //     setConfig((prev: any) => ({ ...prev, ...snap.data() }));
+    //   }
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
 
-    // Listen to Payments
-    const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
-      if (snap.exists()) {
-        setPayments((prev: any) => ({ ...prev, ...snap.data() }));
-      }
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
+    // // Listen to Payments
+    // const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
+    //   if (snap.exists()) {
+    //     setPayments((prev: any) => ({ ...prev, ...snap.data() }));
+    //   }
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
 
-    // Listen to Services
-    const unsubServices = onSnapshot(query(collection(db, 'services'), orderBy('title')), (snap) => {
-      setServices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'services'));
+    // // Listen to Services
+    // const unsubServices = onSnapshot(query(collection(db, 'services'), orderBy('title')), (snap) => {
+    //   setServices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // }, (err) => handleFirestoreError(err, OperationType.LIST, 'services'));
 
-    // Listen to Laptops
-    const unsubLaptops = onSnapshot(query(collection(db, 'laptops'), orderBy('name')), (snap) => {
-      setLaptops(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'laptops'));
+    // // Listen to Laptops
+    // const unsubLaptops = onSnapshot(query(collection(db, 'laptops'), orderBy('name')), (snap) => {
+    //   setLaptops(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // }, (err) => handleFirestoreError(err, OperationType.LIST, 'laptops'));
 
-    // Listen to Ads
-    const unsubAds = onSnapshot(collection(db, 'ads'), (snap) => {
-      setAds(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'ads'));
+    // // Listen to Ads
+    // const unsubAds = onSnapshot(collection(db, 'ads'), (snap) => {
+    //   setAds(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // }, (err) => handleFirestoreError(err, OperationType.LIST, 'ads'));
 
-    // Listen to Products
-    const unsubProducts = onSnapshot(query(collection(db, 'products'), orderBy('name')), (snap) => {
-      setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'products'));
+    // // Listen to Products
+    // const unsubProducts = onSnapshot(query(collection(db, 'products'), orderBy('name')), (snap) => {
+    //   setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // }, (err) => handleFirestoreError(err, OperationType.LIST, 'products'));
 
     // Listen to Registrations
     fetchRegistrations();
 
-    // Listen to Affiliates
-    const unsubAffiliates = onSnapshot(query(collection(db, 'affiliates'), orderBy('name')), (snap) => {
-      setAffiliates(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'affiliates'));
+    // // Listen to Affiliates
+    // const unsubAffiliates = onSnapshot(query(collection(db, 'affiliates'), orderBy('name')), (snap) => {
+    //   setAffiliates(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // }, (err) => handleFirestoreError(err, OperationType.LIST, 'affiliates'));
 
-    // Listen to Visitor Count
-    const unsubStats = onSnapshot(doc(db, 'stats', 'visitors'), (snap) => {
-      if (snap.exists()) {
-        setVisitorCount(snap.data().count || 0);
-      }
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'stats/visitors'));
+    // // Listen to Visitor Count
+    // const unsubStats = onSnapshot(doc(db, 'stats', 'visitors'), (snap) => {
+    //   if (snap.exists()) {
+    //     setVisitorCount(snap.data().count || 0);
+    //   }
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'stats/visitors'));
 
     return () => {
-      unsubConfig();
-      unsubPayments();
-      unsubServices();
-      unsubLaptops();
-      unsubAds();
-      unsubProducts();
-      unsubAffiliates();
-      unsubStats();
+      // unsubConfig();
+      // unsubPayments();
+      // unsubServices();
+      // unsubLaptops();
+      // unsubAds();
+      // unsubProducts();
+      // unsubAffiliates();
+      // unsubStats();
     };
   }, [user]);
 
@@ -171,17 +143,16 @@ export default function Admin() {
   const handleLogin = async () => {
     setSaveStatus(null);
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
     } catch (error: any) {
       console.error(error);
-      if (error.code === 'auth/unauthorized-domain') {
-        setSaveStatus({ 
-          type: 'error', 
-          message: 'Domain belum di-whitelist di Firebase Console. Silakan tambahkan domain hosting Anda ke Authorized Domains di Firebase Auth settings.' 
-        });
-      } else {
-        setSaveStatus({ type: 'error', message: 'Gagal login: ' + (error.message || 'Error tidak diketahui') });
-      }
+      setSaveStatus({ type: 'error', message: 'Gagal login: ' + (error.message || 'Error tidak diketahui') });
     }
   };
 
@@ -438,7 +409,7 @@ export default function Admin() {
             <div className="text-[10px] uppercase font-black tracking-widest text-slate-400">{user.email}</div>
           </div>
           <button 
-            onClick={() => signOut(auth)}
+            onClick={() => supabase.auth.signOut()}
             className="p-3 bg-slate-50 text-slate-500 rounded-xl hover:text-red-500 transition-colors border border-slate-100"
           >
             <LogOut className="w-5 h-5" />
