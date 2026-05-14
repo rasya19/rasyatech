@@ -26,8 +26,9 @@ async function startServer() {
   });
 
   // API route for school verification
-  app.post("/api/verify-school", async (req, res) => {
-    console.log("Received verify-school request:", req.body);
+  app.all("/api/verify-school", async (req, res) => {
+    console.log("Received verify-school request:", req.method, req.body);
+    if(req.method !== 'POST') return res.status(405).json({error: "Only POST allowed"});
     const { email, school_name, subdomain } = req.body;
     
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.VITE_SUPABASE_URL) {
