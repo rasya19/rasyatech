@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,7 +36,18 @@ export default function Home() {
     };
     window.addEventListener('scroll', handleScroll);
     
-    // Fetch Firestore Data (disabled due to firebase removal)
+    // Fetch Data
+    const fetchData = async () => {
+        const { data: config } = await supabase.from('settings').select('*').eq('id', 'config').maybeSingle();
+        if (config) setDbConfig(config);
+
+        const { data: services } = await supabase.from('services').select('*');
+        if (services) setDbServices(services);
+
+        const { data: laptops } = await supabase.from('laptops').select('*');
+        if (laptops) setDbLaptops(laptops);
+    };
+    fetchData();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);

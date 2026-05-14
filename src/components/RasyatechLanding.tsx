@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { supabase } from '../lib/supabase';
 
 const NativeAd = () => {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -204,21 +205,22 @@ export default function RasyatechLanding() {
     }
     const contractEndDate = contractEnd.toISOString().split('T')[0];
 
-    // Save to Firestore
+    // Save to Supabase
     try {
-      const regId = Math.random().toString(36).substring(7);
-      await setDoc(doc(db, 'registrations', regId), {
+      const { error: insertError } = await supabase.from('registrations').insert({
         package: pkg,
-        schoolName: school,
+        school_name: school,
         address: addr,
         email: email,
         password: pass,
-        affiliateEmail: affiliateEmail,
+        affiliate_email: affiliateEmail,
         status: 'pending',
-        contractStart: contractStart,
-        contractEnd: contractEndDate,
-        createdAt: serverTimestamp()
+        contract_start: contractStart,
+        contract_end: contractEndDate,
+        created_at: new Date().toISOString()
       });
+
+      if (insertError) throw insertError;
       
       let promoText = "";
       if (pkg.includes("Annual Promo")) {
@@ -245,7 +247,8 @@ export default function RasyatechLanding() {
       
       alert('Pendaftaran berhasil dikirim! Silakan ikuti instruksi pembayaran.');
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, 'registrations');
+      console.error(err);
+      alert('Pendaftaran gagal. Silakan coba lagi.');
     }
   };
 
