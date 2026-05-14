@@ -134,14 +134,9 @@ export default function Admin() {
   }, [user]);
 
   const fetchRegistrations = async () => {
-    console.log("Fetching registrations...");
-    const { data: regs, error } = await supabase.from('registrations').select('id');
-    console.log("Supabase fetch registrations result:", { data: regs, error });
+    const { data: regs, error } = await supabase.from('registrations').select('*');
     if (error) {
-        console.error("Error message:", error.message);
-        console.error("Error details:", error.details);
-        console.error("Error hint:", error.hint);
-        console.error("Full error object:", error);
+        console.error("Error fetching registrations:", error);
     } else {
         setRegistrations(regs || []);
     }
