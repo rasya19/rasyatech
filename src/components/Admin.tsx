@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { 
   Save, 
   Plus, 
-  Trash2, 
+  Trash2,
   Edit2, 
   LogOut, 
   Laptop as LaptopIcon, 
@@ -161,12 +161,13 @@ export default function Admin() {
     setSavingConfig(true);
     setSaveStatus(null);
     try {
-      await setDoc(doc(db, 'settings', 'config'), config);
+      const { error } = await supabase.from('settings').upsert({ id: 'config', ...config });
+      if (error) throw error;
       setSaveStatus({ type: 'success', message: 'Konfigurasi website berhasil disimpan!' });
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
       setSaveStatus({ type: 'error', message: 'Gagal menyimpan konfigurasi.' });
-      handleFirestoreError(err, OperationType.WRITE, 'settings/config');
+      console.error(err);
     } finally {
       setSavingConfig(false);
     }
@@ -177,12 +178,13 @@ export default function Admin() {
     setSavingPayments(true);
     setSaveStatus(null);
     try {
-      await setDoc(doc(db, 'settings', 'payments'), payments);
+      const { error } = await supabase.from('settings').upsert({ id: 'payments', ...payments });
+      if (error) throw error;
       setSaveStatus({ type: 'success', message: 'Konfigurasi pembayaran berhasil disimpan!' });
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
       setSaveStatus({ type: 'error', message: 'Gagal menyimpan konfigurasi pembayaran.' });
-      handleFirestoreError(err, OperationType.WRITE, 'settings/payments');
+      console.error(err);
     } finally {
       setSavingPayments(false);
     }
@@ -191,130 +193,88 @@ export default function Admin() {
   const handleDeleteService = async (id: string) => {
     if (!confirm('Yakin ingin menghapus layanan ini?')) return;
     try {
-      await deleteDoc(doc(db, 'services', id));
+      const { error } = await supabase.from('services').delete().eq('id', id);
+      if (error) throw error;
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `services/${id}`);
+      console.error(err);
     }
   };
 
   const handleSaveService = async (e: FormEvent) => {
     e.preventDefault();
     const data = editingService;
-    const id = data.id || Math.random().toString(36).substring(7);
     try {
-      const { id: _, ...payload } = data;
-      await setDoc(doc(db, 'services', id), payload);
+      const { error } = await supabase.from('services').upsert(data);
+      if (error) throw error;
       setEditingService(null);
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `services/${id}`);
+      console.error(err);
     }
   };
 
   const handleDeleteLaptop = async (id: string) => {
     if (!confirm('Yakin ingin menghapus laptop ini?')) return;
     try {
-      await deleteDoc(doc(db, 'laptops', id));
+      const { error } = await supabase.from('laptops').delete().eq('id', id);
+      if (error) throw error;
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `laptops/${id}`);
+      console.error(err);
     }
   };
 
   const handleSaveLaptop = async (e: FormEvent) => {
     e.preventDefault();
     const data = editingLaptop;
-    const id = data.id || Math.random().toString(36).substring(7);
     try {
-      const { id: _, ...payload } = data;
-      await setDoc(doc(db, 'laptops', id), payload);
+      const { error } = await supabase.from('laptops').upsert(data);
+      if (error) throw error;
       setEditingLaptop(null);
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `laptops/${id}`);
+      console.error(err);
     }
   };
 
   const handleDeleteProduct = async (id: string) => {
     if (!confirm('Yakin ingin menghapus barang ini?')) return;
     try {
-      await deleteDoc(doc(db, 'products', id));
-    } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `products/${id}`);
-    }
-  };
-
-  const handleDeleteRegistration = async (id: string) => {
-    if (!confirm('Hapus data pendaftar ini?')) return;
-    try {
-      const { error } = await supabase.from('registrations').delete().eq('id', id);
+      const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) throw error;
-      fetchRegistrations();
     } catch (err) {
       console.error(err);
-      setSaveStatus({ type: 'error', message: 'Gagal menghapus pendaftar.' });
-    }
-  };
-
-  const handleUpdateRegStatus = async (id: string, status: string) => {
-    try {
-      const { error } = await supabase.from('registrations').update({ status }).eq('id', id);
-      if (error) throw error;
-      fetchRegistrations();
-    } catch (err) {
-      console.error(err);
-      setSaveStatus({ type: 'error', message: 'Gagal update status.' });
-    }
-  };
-
-  const handleSaveRegistration = async (e: FormEvent) => {
-    e.preventDefault();
-    const data = editingRegistration;
-    try {
-        if (data.id) {
-            const { error } = await supabase.from('registrations').update(data).eq('id', data.id);
-            if (error) throw error;
-        } else {
-             const { error } = await supabase.from('registrations').insert(data);
-             if (error) throw error;
-        }
-        setEditingRegistration(null);
-        fetchRegistrations();
-    } catch (err) {
-      console.error(err);
-      setSaveStatus({ type: 'error', message: 'Gagal menyimpan pendaftar.' });
     }
   };
 
   const handleSaveProduct = async (e: FormEvent) => {
     e.preventDefault();
     const data = editingProduct;
-    const id = data.id || Math.random().toString(36).substring(7);
     try {
-      const { id: _, ...payload } = data;
-      await setDoc(doc(db, 'products', id), payload);
+      const { error } = await supabase.from('products').upsert(data);
+      if (error) throw error;
       setEditingProduct(null);
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `products/${id}`);
+      console.error(err);
     }
   };
 
   const handleDeleteAffiliate = async (id: string) => {
     if (!confirm('Hapus mitra affiliasi ini?')) return;
     try {
-      await deleteDoc(doc(db, 'affiliates', id));
+      const { error } = await supabase.from('affiliates').delete().eq('id', id);
+      if (error) throw error;
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `affiliates/${id}`);
+      console.error(err);
     }
   };
 
   const handleSaveAffiliate = async (e: FormEvent) => {
     e.preventDefault();
     const data = editingAffiliate;
-    const id = data.id || Math.random().toString(36).substring(7);
     try {
-      const { id: _, ...payload } = data;
-      await setDoc(doc(db, 'affiliates', id), payload);
+      const { error } = await supabase.from('affiliates').upsert(data);
+      if (error) throw error;
       setEditingAffiliate(null);
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `affiliates/${id}`);
+      console.error(err);
     }
   };
 
@@ -327,17 +287,14 @@ export default function Admin() {
         { email: 'platinum@demo.com', plan: 'platinum', name: 'User Platinum', data: { stats: { views: 999 }, qr: 'https://qr.example.com', theme: 'black-gold' } }
       ];
       
-      for (const acc of demoAccounts) {
-        await setDoc(doc(db, 'users', acc.email), {
-          ...acc,
-          updatedAt: new Date()
-        });
-      }
+      const { error } = await supabase.from('users').upsert(demoAccounts);
+      if (error) throw error;
+
       setSaveStatus({ type: 'success', message: 'Data demo 3 akun berhasil dibuat!' });
       setTimeout(() => setSaveStatus(null), 3000);
     } catch (err) {
       setSaveStatus({ type: 'error', message: 'Gagal seeding data.' });
-      handleFirestoreError(err, OperationType.WRITE, 'users/seed');
+      console.error(err);
     }
   };
 
