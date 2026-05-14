@@ -3,6 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
+import nodemailer from "nodemailer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,6 +13,15 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Setup nodemailer transporter
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
 
   // API route for school verification
   app.post("/api/verify-school", async (req, res) => {
@@ -32,8 +42,18 @@ async function startServer() {
 
     if (userError) return res.status(400).json({ error: userError.message });
 
-    // 2. We can optionally assign roles or profile data here if needed,
-    // but the user only asked for Auth account creation.
+    // 2. Send email
+    try {
+        await transporter.sendMail({
+            from: '"Rasyacomp Support" <ismanto095@gmail.com>',
+            to: email,
+            subject: `Selamat! Website Sekolah ${school_name} Telah Aktif`,
+            text: `Halo Admin ${school_name},\n\nPendaftaran Anda di Rasyatech telah diverifikasi. Sekarang Anda sudah memiliki website resmi sendiri. Berikut adalah detail akses Anda:\n\nURL Website: https://${subdomain}.rasch.my.id\n\nEmail Login: ${email}\n\nSilakan klik URL di atas untuk mulai mengelola profil sekolah Anda. Terima kasih telah mempercayakan layanan digital Anda kepada Rasyatech.\n\nSalam,\nRasyacomp Support`
+        });
+    } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+        // Don't fail the verification if email fails
+    }
 
     res.json({ success: true, user: userData.user });
   });
