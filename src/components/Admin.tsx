@@ -18,6 +18,7 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 import { 
   Save, 
   Plus, 
@@ -132,9 +133,7 @@ export default function Admin() {
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'products'));
 
     // Listen to Registrations
-    const unsubRegistrations = onSnapshot(query(collection(db, 'registrations'), orderBy('createdAt', 'desc')), (snap) => {
-      setRegistrations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    }, (err) => handleFirestoreError(err, OperationType.LIST, 'registrations'));
+    fetchRegistrations();
 
     // Listen to Affiliates
     const unsubAffiliates = onSnapshot(query(collection(db, 'affiliates'), orderBy('name')), (snap) => {
@@ -155,11 +154,19 @@ export default function Admin() {
       unsubLaptops();
       unsubAds();
       unsubProducts();
-      unsubRegistrations();
       unsubAffiliates();
       unsubStats();
     };
   }, [user]);
+
+  const fetchRegistrations = async () => {
+    const { data: regs, error } = await supabase.from('registrations').select('*').order('created_at', { ascending: false });
+    if (error) {
+        console.error("Error fetching registrations:", error);
+    } else {
+        setRegistrations(regs || []);
+    }
+  };
 
   const handleLogin = async () => {
     setSaveStatus(null);
@@ -266,34 +273,42 @@ export default function Admin() {
   const handleDeleteRegistration = async (id: string) => {
     if (!confirm('Hapus data pendaftar ini?')) return;
     try {
-      await deleteDoc(doc(db, 'registrations', id));
+      const { error } = await supabase.from('registrations').delete().eq('id', id);
+      if (error) throw error;
+      fetchRegistrations();
     } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, `registrations/${id}`);
+      console.error(err);
+      setSaveStatus({ type: 'error', message: 'Gagal menghapus pendaftar.' });
     }
   };
 
   const handleUpdateRegStatus = async (id: string, status: string) => {
     try {
-      await updateDoc(doc(db, 'registrations', id), { status });
+      const { error } = await supabase.from('registrations').update({ status }).eq('id', id);
+      if (error) throw error;
+      fetchRegistrations();
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `registrations/${id}`);
+      console.error(err);
+      setSaveStatus({ type: 'error', message: 'Gagal update status.' });
     }
   };
 
   const handleSaveRegistration = async (e: FormEvent) => {
     e.preventDefault();
     const data = editingRegistration;
-    const id = data.id || Math.random().toString(36).substring(7);
     try {
-      const { id: _, ...payload } = data;
-      await setDoc(doc(db, 'registrations', id), {
-        ...payload,
-        createdAt: payload.createdAt || new Date(),
-        status: payload.status || 'pending'
-      });
-      setEditingRegistration(null);
+        if (data.id) {
+            const { error } = await supabase.from('registrations').update(data).eq('id', data.id);
+            if (error) throw error;
+        } else {
+             const { error } = await supabase.from('registrations').insert(data);
+             if (error) throw error;
+        }
+        setEditingRegistration(null);
+        fetchRegistrations();
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `registrations/${id}`);
+      console.error(err);
+      setSaveStatus({ type: 'error', message: 'Gagal menyimpan pendaftar.' });
     }
   };
 
@@ -797,7 +812,7 @@ export default function Admin() {
                     <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                       <div>
                         <div className="flex items-center gap-3 mb-2">
-                          <h4 className="text-xl font-black">{reg.schoolName}</h4>
+                          <h4 className="text-xl font-black">{reg.school_name}</h4>
                           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                             reg.status === 'pending' ? 'bg-amber-100 text-amber-600' : 
                             reg.status === 'verified' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-600'
@@ -833,7 +848,7 @@ export default function Admin() {
                       </div>
                       <div>
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Sekolah / NPSN</label>
-                        <p className="font-bold text-slate-900">{reg.schoolName}</p>
+                        <p className="font-bold text-slate-900">{reg.school_name}</p>
                         <p className="text-xs text-slate-500">NPSN: {reg.npsn || '-'}</p>
                       </div>
                       <div>
@@ -843,7 +858,7 @@ export default function Admin() {
                       <div>
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Ekspektasi</label>
                         <p className="font-bold text-indigo-600">{reg.package}</p>
-                        <p className="text-xs text-slate-500">Affiliate: {reg.affiliateEmail || 'Langsung'}</p>
+                        <p className="text-xs text-slate-500">Affiliate: {reg.affiliate_email || 'Langsung'}</p>
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
@@ -853,9 +868,10 @@ export default function Admin() {
                          placeholder="Komisi (Rp)" 
                          className="p-2 border rounded-lg text-sm font-bold w-32"
                          value={reg.commission || ''}
-                         onChange={(e) => {
+                         onChange={async (e) => {
                            const val = e.target.value;
-                           updateDoc(doc(db, 'registrations', reg.id), { commission: Number(val) || 0 });
+                           await supabase.from('registrations').update({ commission: Number(val) || 0 }).eq('id', reg.id);
+                           fetchRegistrations();
                          }}
                        />
                     </div>
