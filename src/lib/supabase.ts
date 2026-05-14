@@ -7,7 +7,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error("CRITICAL: Missing Supabase configuration or placeholder detected. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are correctly set in the AI Studio Secrets panel.");
 }
 
-export const supabase = createClient(
-  supabaseUrl || '', 
-  supabaseAnonKey || ''
-);
+// Check for "placeholder" or empty
+const isValid = supabaseUrl && supabaseUrl !== 'placeholder' && supabaseAnonKey && supabaseAnonKey !== 'placeholder';
+
+export const supabase = isValid
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
