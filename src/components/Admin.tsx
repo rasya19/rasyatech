@@ -318,6 +318,34 @@ export default function Admin() {
     }
   };
 
+  const [verifyingReg, setVerifyingReg] = useState<any>(null);
+  const [subdomain, setSubdomain] = useState('');
+
+  const handleVerifySchool = async () => {
+    if (!verifyingReg || !subdomain) return;
+    
+    try {
+        const { error: apiError } = await fetch('/api/verify-school', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: verifyingReg.email,
+                school_name: verifyingReg.school_name,
+                subdomain
+            })
+        }).then(res => res.json());
+
+        if (apiError) throw new Error(apiError);
+
+        await handleUpdateRegStatus(verifyingReg.id, 'verified');
+        await supabase.from('registrations').update({ subdomain_prefix: subdomain }).eq('id', verifyingReg.id);
+        setVerifyingReg(null);
+        setSubdomain('');
+    } catch(err: any) {
+        setSaveStatus({ type: 'error', message: 'Gagal verifikasi: ' + err.message });
+    }
+  };
+
   const handleUpdateRegStatus = async (id: string, status: string) => {
     try {
       console.log(`Updating ${id} to ${status}...`);
@@ -830,7 +858,7 @@ export default function Admin() {
                   <p className="text-slate-500 font-medium">Kelola pendaftaran sekolah baru dari landing page.</p>
                 </div>
                 <button 
-                  onClick={() => setEditingRegistration({ school_name: '', npsn: '', admin_name: '', package: 'Silver Monthly', email: '', address: '', status: 'verified', affiliate_email: '', commission: 0 })}
+                  onClick={() => setEditingRegistration({ subdomain_prefix: '', school_name: '', npsn: '', admin_name: '', package: 'Silver Monthly', email: '', address: '', status: 'verified', affiliate_email: '', commission: 0 })}
                   className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
                 >
                   <Plus className="w-5 h-5" /> Tambah Pendaftar
@@ -857,7 +885,7 @@ export default function Admin() {
                       </div>
                       <div className="flex gap-2">
                         <button 
-                          onClick={() => handleUpdateRegStatus(reg.id, reg.status === 'verified' ? 'pending' : 'verified')}
+                          onClick={() => setVerifyingReg(reg)}
                           className={`px-4 py-2 rounded-xl font-black text-xs flex items-center gap-2 ${
                             reg.status === 'verified' ? 'bg-slate-100 text-slate-600' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-100'
                           }`}
@@ -957,6 +985,25 @@ export default function Admin() {
 
       {/* Modals */}
       <AnimatePresence>
+        {verifyingReg && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setVerifyingReg(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-lg p-10 rounded-[40px] shadow-2xl">
+              <h3 className="text-2xl font-black mb-4">Verifikasi {verifyingReg.school_name}</h3>
+              <p className="text-slate-500 mb-6 font-medium">Masukkan subdomain yang diinginkan (cth: sekolah1 -> sekolah1.rasyatech.rsch.my.id)</p>
+              <form onSubmit={(e) => { e.preventDefault(); handleVerifySchool(); }} className="space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Subdomain Prefix</label>
+                  <input type="text" required value={subdomain} onChange={e => setSubdomain(e.target.value)} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl">Verifikasi & Buat Akun</button>
+                  <button type="button" onClick={() => setVerifyingReg(null)} className="px-8 py-5 bg-slate-100 text-slate-600 font-black rounded-2xl">Batal</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
         {editingService && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingService(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
@@ -1093,6 +1140,10 @@ export default function Admin() {
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-xl p-10 rounded-[40px] shadow-2xl overflow-y-auto max-h-[90vh]">
               <h3 className="text-3xl font-black mb-8">Tambah / Edit Pendaftar</h3>
               <form onSubmit={handleSaveRegistration} className="space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Subdomain Prefix (cth: sekolah1)</label>
+                  <input type="text" required value={editingRegistration.subdomain_prefix || ''} onChange={e => setEditingRegistration({ ...editingRegistration, subdomain_prefix: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Sekolah / Instansi</label>
                   <input type="text" required value={editingRegistration.school_name || ''} onChange={e => setEditingRegistration({ ...editingRegistration, school_name: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
