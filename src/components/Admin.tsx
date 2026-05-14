@@ -325,7 +325,8 @@ export default function Admin() {
     if (!verifyingReg || !subdomain) return;
     
     try {
-        const { error: apiError } = await fetch('/api/verify-school', {
+        console.log("Calling /api/verify-school...");
+        const response = await fetch('/api/verify-school', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -333,15 +334,24 @@ export default function Admin() {
                 school_name: verifyingReg.school_name,
                 subdomain
             })
-        }).then(res => res.json());
+        });
 
-        if (apiError) throw new Error(apiError);
+        if (!response.ok) {
+           const errorBody = await response.text();
+           console.error("Server error response:", errorBody);
+           throw new Error(`Server returned ${response.status}: ${errorBody}`);
+        }
+
+        const data = await response.json();
+        console.log("API response:", data);
 
         await handleUpdateRegStatus(verifyingReg.id, 'verified');
         await supabase.from('registrations').update({ subdomain_prefix: subdomain }).eq('id', verifyingReg.id);
         setVerifyingReg(null);
         setSubdomain('');
+        setSaveStatus({ type: 'success', message: 'Verifikasi berhasil!' });
     } catch(err: any) {
+        console.error("Error in handleVerifySchool:", err);
         setSaveStatus({ type: 'error', message: 'Gagal verifikasi: ' + err.message });
     }
   };

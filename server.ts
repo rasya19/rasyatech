@@ -27,6 +27,7 @@ async function startServer() {
 
   // API route for school verification
   app.post("/api/verify-school", async (req, res) => {
+    console.log("Received verify-school request:", req.body);
     const { email, school_name, subdomain } = req.body;
     
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.VITE_SUPABASE_URL) {
