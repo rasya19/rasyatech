@@ -16,7 +16,9 @@ async function startServer() {
 
   // Setup nodemailer transporter
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
@@ -44,14 +46,21 @@ async function startServer() {
 
     // 2. Send email
     try {
-        await transporter.sendMail({
+        console.log(`Attempting to send email to ${email}...`);
+        const info = await transporter.sendMail({
             from: '"Rasyacomp Support" <ismanto095@gmail.com>',
             to: email,
             subject: `Selamat! Website Sekolah ${school_name} Telah Aktif`,
             text: `Halo Admin ${school_name},\n\nPendaftaran Anda di Rasyatech telah diverifikasi. Sekarang Anda sudah memiliki website resmi sendiri. Berikut adalah detail akses Anda:\n\nURL Website: https://${subdomain}.rasch.my.id\n\nEmail Login: ${email}\n\nSilakan klik URL di atas untuk mulai mengelola profil sekolah Anda. Terima kasih telah mempercayakan layanan digital Anda kepada Rasyatech.\n\nSalam,\nRasyacomp Support`
         });
-    } catch (emailError) {
-        console.error("Failed to send email:", emailError);
+        console.log("Email sent successfully:", info.messageId);
+    } catch (emailError: any) {
+        console.error("Failed to send email. Error details:", {
+            message: emailError.message,
+            code: emailError.code,
+            command: emailError.command,
+            response: emailError.response
+        });
         // Don't fail the verification if email fails
     }
 
