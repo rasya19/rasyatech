@@ -320,12 +320,14 @@ export default function Admin() {
 
   const handleUpdateRegStatus = async (id: string, status: string) => {
     try {
+      console.log(`Updating ${id} to ${status}...`);
       const { error } = await supabase.from('registrations').update({ status }).eq('id', id);
       if (error) throw error;
+      console.log("Update successful");
       fetchRegistrations();
-    } catch (err) {
-      console.error(err);
-      setSaveStatus({ type: 'error', message: 'Gagal update status.' });
+    } catch (err: any) {
+      console.error("Error updating status:", err);
+      setSaveStatus({ type: 'error', message: 'Gagal update status: ' + (err.message || 'Error tidak diketahui') });
     }
   };
 
