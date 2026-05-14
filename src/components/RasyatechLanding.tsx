@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// import { doc, onSnapshot, collection, setDoc, serverTimestamp, increment, updateDoc, getDoc } from 'firebase/firestore';
-// import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 

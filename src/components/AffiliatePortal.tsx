@@ -1,19 +1,4 @@
 import { useState, useEffect } from 'react';
-// import { 
-//   signInWithPopup, 
-//   GoogleAuthProvider, 
-//   onAuthStateChanged, 
-//   signOut,
-//   User
-// } from 'firebase/auth';
-// import { 
-//   collection, 
-//   query, 
-//   where, 
-//   onSnapshot, 
-//   orderBy 
-// } from 'firebase/firestore';
-// import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   Users, 
   LogOut, 
@@ -26,22 +11,27 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
+import { supabase } from '../lib/supabase';
 
 export default function AffiliatePortal() {
-  // const [user, setUser] = useState<User | null>(null);
   const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState(false); // set to false for now
+  const [loading, setLoading] = useState(true);
   const [affiliateData, setAffiliateData] = useState<any>(null);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // const unsubscribe = onAuthStateChanged(auth, (u) => {
-    //   setUser(u);
-    //   setLoading(false);
-    // });
-    // return () => unsubscribe();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -86,7 +76,10 @@ export default function AffiliatePortal() {
 
   const handleLogin = async () => {
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+      if (error) throw error;
     } catch (err: any) {
       setError('Gagal login: ' + err.message);
     }
@@ -131,7 +124,7 @@ export default function AffiliatePortal() {
         <h2 className="text-2xl font-black text-slate-900 mb-4">Akses Terbatas</h2>
         <p className="text-slate-500 mb-8 font-medium">{error}</p>
         <div className="flex flex-col gap-3">
-          <button onClick={() => signOut(auth)} className="w-full py-4 bg-slate-100 text-slate-600 font-black rounded-2xl transition-all">Ganti Akun</button>
+          <button onClick={() => supabase.auth.signOut()} className="w-full py-4 bg-slate-100 text-slate-600 font-black rounded-2xl transition-all">Ganti Akun</button>
           <Link to="/" className="w-full py-4 text-indigo-600 font-black">Kembali ke Beranda</Link>
         </div>
       </div>
@@ -155,7 +148,7 @@ export default function AffiliatePortal() {
             <div className="text-sm font-black text-slate-900">{user.displayName}</div>
             <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">{affiliateData?.referralCode}</div>
           </div>
-          <button onClick={() => signOut(auth)} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-100">
+          <button onClick={() => supabase.auth.signOut()} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-100">
             <LogOut className="w-5 h-5" />
           </button>
         </div>
