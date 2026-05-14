@@ -135,7 +135,7 @@ export default function Admin() {
 
   const fetchRegistrations = async () => {
     console.log("Fetching registrations...");
-    const { data: regs, error } = await supabase.from('registrations').select('*').order('created_at', { ascending: false });
+    const { data: regs, error } = await supabase.from('registrations').select('*');
     console.log("Supabase fetch registrations result:", { data: regs, error });
     if (error) {
         console.error("Error fetching registrations:", error);
