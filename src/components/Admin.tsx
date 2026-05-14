@@ -784,7 +784,7 @@ export default function Admin() {
                   <p className="text-slate-500 font-medium">Kelola pendaftaran sekolah baru dari landing page.</p>
                 </div>
                 <button 
-                  onClick={() => setEditingRegistration({ schoolName: '', package: 'Silver Monthly', email: '', address: '', status: 'verified', affiliateEmail: '', commission: 0 })}
+                  onClick={() => setEditingRegistration({ schoolName: '', npsn: '', admin_name: '', package: 'Silver Monthly', email: '', address: '', status: 'verified', affiliateEmail: '', commission: 0 })}
                   className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
                 >
                   <Plus className="w-5 h-5" /> Tambah Pendaftar
@@ -825,28 +825,25 @@ export default function Admin() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-50">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6 border-t border-slate-50">
                       <div>
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Kontak Admin</label>
-                        <p className="font-bold text-slate-900">{reg.email}</p>
+                        <p className="font-bold text-slate-900">{reg.admin_name || '-'}</p>
+                        <p className="text-xs text-slate-500">{reg.email}</p>
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Alamat Sekolah</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Sekolah / NPSN</label>
+                        <p className="font-bold text-slate-900">{reg.schoolName}</p>
+                        <p className="text-xs text-slate-500">NPSN: {reg.npsn || '-'}</p>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Alamat</label>
                         <p className="font-bold text-slate-900">{reg.address}</p>
                       </div>
                       <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Referral</label>
-                        <p className="font-bold text-indigo-600">{reg.affiliateEmail || 'Langsung'}</p>
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Masa Kontrak</label>
-                        <p className={`font-black text-xs ${
-                          reg.contractEnd && new Date(reg.contractEnd) < new Date() ? 'text-red-500' : 'text-emerald-600'
-                        }`}>
-                          {reg.contractEnd ? (
-                            new Date(reg.contractEnd) < new Date() ? 'EXPIRED: ' + reg.contractEnd : 'AKTIF s/d ' + reg.contractEnd
-                          ) : 'Belum Atur'}
-                        </p>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Ekspektasi</label>
+                        <p className="font-bold text-indigo-600">{reg.package}</p>
+                        <p className="text-xs text-slate-500">Affiliate: {reg.affiliateEmail || 'Langsung'}</p>
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
@@ -1052,6 +1049,14 @@ export default function Admin() {
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Sekolah / Instansi</label>
                   <input type="text" required value={editingRegistration.schoolName} onChange={e => setEditingRegistration({ ...editingRegistration, schoolName: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">NPSN</label>
+                  <input type="text" required value={editingRegistration.npsn || ''} onChange={e => setEditingRegistration({ ...editingRegistration, npsn: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                </div>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Admin Sekolah</label>
+                  <input type="text" required value={editingRegistration.admin_name || ''} onChange={e => setEditingRegistration({ ...editingRegistration, admin_name: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
                 </div>
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Alamat</label>
