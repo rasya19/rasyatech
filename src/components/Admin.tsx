@@ -55,6 +55,8 @@ export default function Admin() {
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [editingAffiliate, setEditingAffiliate] = useState<any>(null);
   const [editingRegistration, setEditingRegistration] = useState<any>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -157,6 +159,21 @@ export default function Admin() {
         options: {
           redirectTo: window.location.origin
         }
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      console.error(error);
+      setSaveStatus({ type: 'error', message: 'Gagal login: ' + (error.message || 'Error tidak diketahui') });
+    }
+  };
+
+  const handleManualLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaveStatus(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
       if (error) throw error;
     } catch (error: any) {
@@ -389,9 +406,38 @@ export default function Admin() {
         <p className="text-slate-500 mb-10 font-medium leading-relaxed">
           Silakan login menggunakan akun Google Anda untuk mengelola konten website.
         </p>
+        <form onSubmit={handleManualLogin} className="space-y-4 mb-8">
+          <div>
+            <input 
+              type="email" 
+              placeholder="Email" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold"
+            />
+          </div>
+          <div>
+            <input 
+              type="password" 
+              placeholder="Password" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)}
+              required
+              className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold"
+            />
+          </div>
+          <button 
+            type="submit"
+            className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
+          >
+            Login
+          </button>
+        </form>
+        <div className="text-center font-bold text-slate-400 mb-4">ATAU</div>
         <button 
           onClick={handleLogin}
-          className="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all"
+          className="w-full py-5 bg-white text-slate-600 font-black rounded-2xl border-2 border-slate-200 flex items-center justify-center gap-3 hover:bg-slate-50 transition-all"
         >
           Login with Google
         </button>
