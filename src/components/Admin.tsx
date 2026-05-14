@@ -324,6 +324,8 @@ export default function Admin() {
       const { error } = await supabase.from('registrations').update({ status }).eq('id', id);
       if (error) throw error;
       console.log("Update successful");
+      setSaveStatus({ type: 'success', message: 'Status berhasil diperbarui!' });
+      setTimeout(() => setSaveStatus(null), 3000);
       fetchRegistrations();
     } catch (err: any) {
       console.error("Error updating status:", err);
