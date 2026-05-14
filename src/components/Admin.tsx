@@ -140,6 +140,15 @@ export default function Admin() {
     }
   };
 
+  const fetchAffiliates = async () => {
+    const { data: affs, error } = await supabase.from('affiliates').select('*').order('name', { ascending: true });
+    if (error) {
+        console.error("Error fetching affiliates:", error);
+    } else {
+        setAffiliates(affs || []);
+    }
+  };
+
   const handleLogin = async () => {
     setSaveStatus(null);
     try {
@@ -261,6 +270,7 @@ export default function Admin() {
     try {
       const { error } = await supabase.from('affiliates').delete().eq('id', id);
       if (error) throw error;
+      fetchAffiliates(); // Assumed function exists or is needed
     } catch (err) {
       console.error(err);
     }
@@ -273,8 +283,51 @@ export default function Admin() {
       const { error } = await supabase.from('affiliates').upsert(data);
       if (error) throw error;
       setEditingAffiliate(null);
+      fetchAffiliates();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleDeleteRegistration = async (id: string) => {
+    if (!confirm('Hapus data pendaftar ini?')) return;
+    try {
+      const { error } = await supabase.from('registrations').delete().eq('id', id);
+      if (error) throw error;
+      fetchRegistrations();
+    } catch (err) {
+      console.error(err);
+      setSaveStatus({ type: 'error', message: 'Gagal menghapus pendaftar.' });
+    }
+  };
+
+  const handleUpdateRegStatus = async (id: string, status: string) => {
+    try {
+      const { error } = await supabase.from('registrations').update({ status }).eq('id', id);
+      if (error) throw error;
+      fetchRegistrations();
+    } catch (err) {
+      console.error(err);
+      setSaveStatus({ type: 'error', message: 'Gagal update status.' });
+    }
+  };
+
+  const handleSaveRegistration = async (e: FormEvent) => {
+    e.preventDefault();
+    const data = editingRegistration;
+    try {
+        if (data.id) {
+            const { error } = await supabase.from('registrations').update(data).eq('id', data.id);
+            if (error) throw error;
+        } else {
+             const { error } = await supabase.from('registrations').insert(data);
+             if (error) throw error;
+        }
+        setEditingRegistration(null);
+        fetchRegistrations();
+    } catch (err) {
+      console.error(err);
+      setSaveStatus({ type: 'error', message: 'Gagal menyimpan pendaftar.' });
     }
   };
 
@@ -727,7 +780,7 @@ export default function Admin() {
                   <p className="text-slate-500 font-medium">Kelola pendaftaran sekolah baru dari landing page.</p>
                 </div>
                 <button 
-                  onClick={() => setEditingRegistration({ schoolName: '', npsn: '', admin_name: '', package: 'Silver Monthly', email: '', address: '', status: 'verified', affiliateEmail: '', commission: 0 })}
+                  onClick={() => setEditingRegistration({ school_name: '', npsn: '', admin_name: '', package: 'Silver Monthly', email: '', address: '', status: 'verified', affiliate_email: '', commission: 0 })}
                   className="px-6 py-3 bg-indigo-600 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg"
                 >
                   <Plus className="w-5 h-5" /> Tambah Pendaftar
@@ -992,7 +1045,7 @@ export default function Admin() {
               <form onSubmit={handleSaveRegistration} className="space-y-6">
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">Nama Sekolah / Instansi</label>
-                  <input type="text" required value={editingRegistration.schoolName} onChange={e => setEditingRegistration({ ...editingRegistration, schoolName: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                  <input type="text" required value={editingRegistration.school_name || ''} onChange={e => setEditingRegistration({ ...editingRegistration, school_name: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
                 </div>
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400">NPSN</label>
@@ -1035,7 +1088,7 @@ export default function Admin() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Affiliate (Opsional)</label>
-                    <input type="email" value={editingRegistration.affiliateEmail} onChange={e => setEditingRegistration({ ...editingRegistration, affiliateEmail: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                    <input type="email" value={editingRegistration.affiliate_email || ''} onChange={e => setEditingRegistration({ ...editingRegistration, affiliate_email: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
                   </div>
                   <div>
                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Komisi (Rp)</label>
