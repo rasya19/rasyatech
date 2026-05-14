@@ -1,15 +1,38 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// DANGER: Credentials hardcoded for prototyping purposes.
+// Do NOT commit these to production or share this codebase publicly.
+const supabaseUrl = "https://erosuotjshhmhduoprwi.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyb3N1b3Rqc2hobWhkdW9wcndpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNjc0NzAsImV4cCI6MjA5Mzg0MzQ3MH0.h2JrBMEEVlnQWq5v23g6LVryU1sclFyH6lq_vafCAhs";
 
-// Debug log to identify what is actually being loaded
-console.log("Supabase Debug - Full Env Keys:", Object.keys(import.meta.env));
-console.log("Supabase Debug - URL from env:", supabaseUrl);
-console.log("Supabase Debug - Key from env:", supabaseKey ? "Present" : "Missing");
+// Debug: Log all environment variables to find the correct names
+console.log("Supabase Debug - All Env Variables:", import.meta.env);
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error("CRITICAL: Missing Supabase configuration. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are correctly set in the AI Studio Secrets panel.");
+// Helper to check configuration
+const isConfigured = supabaseUrl && supabaseKey && supabaseUrl !== 'undefined';
+
+if (!isConfigured) {
+  console.error(
+    "%c CRITICAL: Supabase Configuration Missing! %c\n\n" +
+    "Application cannot connect to the database because VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is undefined.\n" +
+    "Please check the browser console for a list of available environment variables.",
+    "background: red; color: white; font-size: 20px; font-weight: bold;",
+    ""
+  );
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseKey || '');
+// Create a safe client or a dummy one that warns if used
+export const supabase = isConfigured
+  ? createClient(supabaseUrl, supabaseKey)
+  : {
+      auth: {
+        getSession: () => Promise.resolve({ data: { session: null } }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+        signInWithOAuth: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+        signOut: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      },
+      from: () => ({
+        select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: null, error: null }) }) }),
+        insert: () => Promise.resolve({ error: new Error('Supabase not configured') }),
+      })
+    } as any;
