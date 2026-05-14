@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { doc, onSnapshot, collection, setDoc, serverTimestamp, increment, updateDoc, getDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+// import { doc, onSnapshot, collection, setDoc, serverTimestamp, increment, updateDoc, getDoc } from 'firebase/firestore';
+// import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
@@ -84,81 +84,81 @@ export default function RasyatechLanding() {
   const [showDaftarDropdown, setShowDaftarDropdown] = useState(false);
 
   useEffect(() => {
-    // Listen to Payments from Firestore
-    const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
-      if (snap.exists()) {
-        setPayments((prev: any) => ({ ...prev, ...snap.data() }));
-      }
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
-
-    // Listen to Config from Firestore
-    const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
-      if (snap.exists()) {
-        setConfig((prev: any) => ({ ...prev, ...snap.data() }));
-      }
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
-
-    // Listen to Laptops
-    const unsubLaptops = onSnapshot(collection(db, 'laptops'), (snap) => {
-      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setLaptops(list);
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'laptops'));
-
-    // Listen to Ads
-    const unsubAds = onSnapshot(collection(db, 'ads'), (snap) => {
-      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAds(list.filter((ad: any) => ad.isActive));
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'ads'));
-
-    // Listen to Products
-    const unsubProducts = onSnapshot(collection(db, 'products'), (snap) => {
-      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setProducts(list);
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'products'));
-
-    // Listen to Affiliates
-    const unsubAffiliates = onSnapshot(collection(db, 'affiliates'), (snap) => {
-      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAffiliates(list);
-    }, (err) => handleFirestoreError(err, OperationType.GET, 'affiliates'));
-
-    // Visitor Count Logic
-    const visitorRef = doc(db, 'stats', 'visitors');
-    const hasVisited = sessionStorage.getItem('rasyatech_visited');
-    
-    if (!hasVisited) {
-      const updateCount = async () => {
-        try {
-          const snap = await getDoc(visitorRef);
-          if (!snap.exists()) {
-            await setDoc(visitorRef, { count: 1 });
-          } else {
-            await updateDoc(visitorRef, { count: increment(1) });
-          }
-          sessionStorage.setItem('rasyatech_visited', 'true');
-        } catch (e) {
-          console.error("Error updating visitor count", e);
-        }
-      };
-      updateCount();
-    }
-
-    // Listen to Visitor Count
-    const unsubStats = onSnapshot(visitorRef, (snap) => {
-      if (snap.exists()) {
-        setVisitorCount(snap.data().count || 0);
-      }
-    });
-
-    return () => {
-      unsubPayments();
-      unsubConfig();
-      unsubLaptops();
-      unsubAds();
-      unsubProducts();
-      unsubAffiliates();
-      unsubStats();
-    };
+    // // Listen to Payments from Firestore
+    // const unsubPayments = onSnapshot(doc(db, 'settings', 'payments'), (snap) => {
+    //   if (snap.exists()) {
+    //     setPayments((prev: any) => ({ ...prev, ...snap.data() }));
+    //   }
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/payments'));
+    // 
+    // // Listen to Config from Firestore
+    // const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
+    //   if (snap.exists()) {
+    //     setConfig((prev: any) => ({ ...prev, ...snap.data() }));
+    //   }
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'settings/config'));
+    // 
+    // // Listen to Laptops
+    // const unsubLaptops = onSnapshot(collection(db, 'laptops'), (snap) => {
+    //   const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    //   setLaptops(list);
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'laptops'));
+    // 
+    // // Listen to Ads
+    // const unsubAds = onSnapshot(collection(db, 'ads'), (snap) => {
+    //   const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    //   setAds(list.filter((ad: any) => ad.isActive));
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'ads'));
+    // 
+    // // Listen to Products
+    // const unsubProducts = onSnapshot(collection(db, 'products'), (snap) => {
+    //   const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    //   setProducts(list);
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'products'));
+    // 
+    // // Listen to Affiliates
+    // const unsubAffiliates = onSnapshot(collection(db, 'affiliates'), (snap) => {
+    //   const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    //   setAffiliates(list);
+    // }, (err) => handleFirestoreError(err, OperationType.GET, 'affiliates'));
+    // 
+    // // Visitor Count Logic
+    // const visitorRef = doc(db, 'stats', 'visitors');
+    // const hasVisited = sessionStorage.getItem('rasyatech_visited');
+    // 
+    // if (!hasVisited) {
+    //   const updateCount = async () => {
+    //     try {
+    //       const snap = await getDoc(visitorRef);
+    //       if (!snap.exists()) {
+    //         await setDoc(visitorRef, { count: 1 });
+    //       } else {
+    //         await updateDoc(visitorRef, { count: increment(1) });
+    //       }
+    //       sessionStorage.setItem('rasyatech_visited', 'true');
+    //     } catch (e) {
+    //       console.error("Error updating visitor count", e);
+    //     }
+    //   };
+    //   updateCount();
+    // }
+    // 
+    // // Listen to Visitor Count
+    // const unsubStats = onSnapshot(visitorRef, (snap) => {
+    //   if (snap.exists()) {
+    //     setVisitorCount(snap.data().count || 0);
+    //   }
+    // });
+    // 
+    // return () => {
+    //   unsubPayments();
+    //   unsubConfig();
+    //   unsubLaptops();
+    //   unsubAds();
+    //   unsubProducts();
+    //   unsubAffiliates();
+    //   unsubStats();
+    // };
   }, []);
 
   const selectPackage = (pkg: string, type: 'Annual' | 'Monthly' = 'Annual') => {

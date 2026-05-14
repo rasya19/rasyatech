@@ -18,8 +18,8 @@ import {
   Package
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { collection, query, orderBy, onSnapshot, doc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+// import { collection, query, orderBy, onSnapshot, doc } from 'firebase/firestore';
+// import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 
 export default function Home() {
@@ -37,24 +37,24 @@ export default function Home() {
     };
     window.addEventListener('scroll', handleScroll);
     
-    // Fetch Firestore Data
-    const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
-      if (snap.exists()) setDbConfig(snap.data());
-    });
+    // Fetch Firestore Data (disabled due to firebase removal)
+    // const unsubConfig = onSnapshot(doc(db, 'settings', 'config'), (snap) => {
+    //   if (snap.exists()) setDbConfig(snap.data());
+    // });
     
-    const unsubServices = onSnapshot(query(collection(db, 'services')), (snap) => {
-      if (!snap.empty) setDbServices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
+    // const unsubServices = onSnapshot(query(collection(db, 'services')), (snap) => {
+    //   if (!snap.empty) setDbServices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // });
     
-    const unsubLaptops = onSnapshot(query(collection(db, 'laptops')), (snap) => {
-      if (!snap.empty) setDbLaptops(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
+    // const unsubLaptops = onSnapshot(query(collection(db, 'laptops')), (snap) => {
+    //   if (!snap.empty) setDbLaptops(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      unsubConfig();
-      unsubServices();
-      unsubLaptops();
+      // unsubConfig();
+      // unsubServices();
+      // unsubLaptops();
     };
   }, []);
 

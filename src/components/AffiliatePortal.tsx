@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
-import { 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  onAuthStateChanged, 
-  signOut,
-  User
-} from 'firebase/auth';
-import { 
-  collection, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy 
-} from 'firebase/firestore';
-import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
+// import { 
+//   signInWithPopup, 
+//   GoogleAuthProvider, 
+//   onAuthStateChanged, 
+//   signOut,
+//   User
+// } from 'firebase/auth';
+// import { 
+//   collection, 
+//   query, 
+//   where, 
+//   onSnapshot, 
+//   orderBy 
+// } from 'firebase/firestore';
+// import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { 
   Users, 
   LogOut, 
@@ -29,58 +29,59 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function AffiliatePortal() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false); // set to false for now
   const [affiliateData, setAffiliateData] = useState<any>(null);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    // const unsubscribe = onAuthStateChanged(auth, (u) => {
+    //   setUser(u);
+    //   setLoading(false);
+    // });
+    // return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!user) return;
-
-    // Listen to Affiliate Profile
-    const unsubAffiliate = onSnapshot(
-      query(collection(db, 'affiliates'), where('email', '==', user.email)),
-      (snap) => {
-        if (!snap.empty) {
-          setAffiliateData({ id: snap.docs[0].id, ...snap.docs[0].data() });
-          setError(null);
-        } else {
-          setAffiliateData(null);
-          setError('Email Anda tidak terdaftar sebagai mitra affiliasi. Silakan hubungi admin Rasyatech.');
-        }
-      },
-      (err) => handleFirestoreError(err, OperationType.GET, 'affiliates')
-    );
-
-    // Listen to Registrations
-    const unsubRegs = onSnapshot(
-      query(
-        collection(db, 'registrations'), 
-        where('affiliateEmail', '==', user.email),
-        orderBy('createdAt', 'desc')
-      ),
-      (snap) => {
-        setRegistrations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      },
-      (err) => {
-        console.error(err);
-        // Silently handle if index is missing first
-      }
-    );
-
-    return () => {
-      unsubAffiliate();
-      unsubRegs();
-    };
+    // if (!user) return;
+    //
+    // // Listen to Affiliate Profile
+    // const unsubAffiliate = onSnapshot(
+    //   query(collection(db, 'affiliates'), where('email', '==', user.email)),
+    //   (snap) => {
+    //     if (!snap.empty) {
+    //       setAffiliateData({ id: snap.docs[0].id, ...snap.docs[0].data() });
+    //       setError(null);
+    //     } else {
+    //       setAffiliateData(null);
+    //       setError('Email Anda tidak terdaftar sebagai mitra affiliasi. Silakan hubungi admin Rasyatech.');
+    //     }
+    //   },
+    //   (err) => handleFirestoreError(err, OperationType.GET, 'affiliates')
+    // );
+    //
+    // // Listen to Registrations
+    // const unsubRegs = onSnapshot(
+    //   query(
+    //     collection(db, 'registrations'),
+    //     where('affiliateEmail', '==', user.email),
+    //     orderBy('createdAt', 'desc')
+    //   ),
+    //   (snap) => {
+    //     setRegistrations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    //   },
+    //   (err) => {
+    //     console.error(err);
+    //     // Silently handle if index is missing first
+    //   }
+    // );
+    //
+    // return () => {
+    //   unsubAffiliate();
+    //   unsubRegs();
+    // };
   }, [user]);
 
   const handleLogin = async () => {
