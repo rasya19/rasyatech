@@ -32,7 +32,7 @@ async function startServer() {
   };
 
   app.use(cors(corsOptions));
-  app.options('/api/verify-school', cors(corsOptions));
+  app.options('*', cors(corsOptions));
   app.use(express.json());
 
   // Setup nodemailer transporter
