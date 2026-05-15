@@ -13,7 +13,23 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(cors());
+  const allowedOrigins = [
+    'https://rasyatech.rsch.my.id',
+    'https://rasyatech.rsch.web.id',
+    'https://rasyatech-lms-engine.vercel.app'
+  ];
+
+  app.use(cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true
+  }));
   app.options('*', cors());
   app.use(express.json());
 
