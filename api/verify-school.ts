@@ -3,24 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-    // 1. SET HEADERS CORS UNTUK SEMUA REQUEST
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // 1. SET HEADERS CORS (Surat Izin Browser)
+  res.setHeader('Access-Control-Allow-Origin', 'https://rasyatech.rsch.my.id');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
-    // 2. TANGANI PREFLIGHT (METHOD OPTIONS) SECARA TEGAS
-    if (req.method === 'OPTIONS') {
-        // Kita harus ikut sertakan header di atas sebelum mengakhiri response
-        return res.status(200).end();
-    }
-
-    // 3. BATASI HANYA UNTUK METHOD POST
-    if (req.method !== 'POST') {
-        return res.status(455).json({ error: 'Method tidak diizinkan' });
-    }
-
-  // 2. TANGANI PREFLIGHT (Cek Koneksi Awal Browser)
+  // 2. TANGANI PREFLIGHT (Tes Ombak Browser)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -32,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { email, school_name, subdomain } = req.body;
   
-  // 4. VALIDASI KONFIGURASI SERVER (Environment Variables)
+  // 4. VALIDASI KONFIGURASI SERVER (ENV)
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.VITE_SUPABASE_URL) {
     return res.status(500).json({ error: "Server configuration missing" });
   }
@@ -43,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   );
 
   try {
-    // 5. PROSES CREATE USER DI SUPABASE AUTH
+    // 5. PROSES CREATE USER DI SUPABASE
     const { data: userData, error: userError } = await adminSupabase.auth.admin.createUser({
       email,
       email_confirm: true,
@@ -65,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     });
 
-    // 7. KIRIM EMAIL NOTIFIKASI KE USER
+    // 7. KIRIM EMAIL NOTIFIKASI
     await transporter.sendMail({
         from: '"Rasyacomp Support" <ismanto095@gmail.com>',
         to: email,
@@ -73,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         text: `Halo Admin ${school_name},\n\nPendaftaran Anda di Rasyatech telah diverifikasi. Sekarang Anda sudah memiliki website resmi sendiri. Berikut adalah detail akses Anda:\n\nURL Website: https://${subdomain}.rasch.my.id\n\nEmail Login: ${email}\n\nSilakan klik URL di atas untuk mulai mengelola profil sekolah Anda. Terima kasih telah mempercayakan layanan digital Anda kepada Rasyatech.\n\nSalam,\nRasyacomp Support`
     });
 
-    // 8. RESPON AKHIR JIKA SEMUA BERHASIL
+    // 8. RESPON SUKSES
     return res.status(200).json({ 
         success: true, 
         message: "Verifikasi berhasil dan email terkirim",
@@ -81,7 +70,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
   } catch (error: any) {
-    console.error("Backend Error Log:", error);
+    console.error("Backend Error:", error);
     return res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 }
