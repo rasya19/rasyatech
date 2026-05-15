@@ -3,12 +3,22 @@ import { createClient } from "@supabase/supabase-js";
 import nodemailer from "nodemailer";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // // CORS Headers
-    // 1. SET HEADERS CORS (Buka akses untuk semua domain agar tidak diblokir)
-    res.setHeader('Access-Control-Allow-Origin', '*'); 
+    // 1. SET HEADERS CORS UNTUK SEMUA REQUEST
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    // 2. TANGANI PREFLIGHT (METHOD OPTIONS) SECARA TEGAS
+    if (req.method === 'OPTIONS') {
+        // Kita harus ikut sertakan header di atas sebelum mengakhiri response
+        return res.status(200).end();
+    }
+
+    // 3. BATASI HANYA UNTUK METHOD POST
+    if (req.method !== 'POST') {
+        return res.status(455).json({ error: 'Method tidak diizinkan' });
+    }
 
   // 2. TANGANI PREFLIGHT (Cek Koneksi Awal Browser)
   if (req.method === 'OPTIONS') {
