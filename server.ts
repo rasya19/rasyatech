@@ -104,9 +104,23 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
-startServer();
+const appHandler = async (req: any, res: any) => {
+    const app = await startServer();
+    app(req, res);
+};
+
+export default appHandler;
+
+if (process.env.NODE_ENV !== 'production') {
+    async function listen() {
+        const app = await startServer();
+        app.listen(3000, "0.0.0.0", () => {
+             console.log(`Server running on http://localhost:3000`);
+        });
+    }
+    listen();
+}
+
