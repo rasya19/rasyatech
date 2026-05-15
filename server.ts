@@ -107,12 +107,10 @@ async function startServer() {
   return app;
 }
 
-const appHandler = async (req: any, res: any) => {
+export default async (req: any, res: any) => {
     const app = await startServer();
-    app(req, res);
+    return app(req, res);
 };
-
-export default appHandler;
 
 if (process.env.NODE_ENV !== 'production') {
     async function listen() {

@@ -1,4 +1,4 @@
 
-import serverHandler from '../server';
+import appHandler from '../server';
 
-export default serverHandler;
+export default appHandler;
