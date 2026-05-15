@@ -19,8 +19,8 @@ async function startServer() {
     'https://rasyatech-lms-engine.vercel.app'
   ];
 
-  app.use(cors({
-    origin: function (origin, callback) {
+  const corsOptions = {
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
@@ -29,8 +29,10 @@ async function startServer() {
     },
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true
-  }));
-  app.options('*', cors());
+  };
+
+  app.use(cors(corsOptions));
+  app.options('/api/verify-school', cors(corsOptions));
   app.use(express.json());
 
   // Setup nodemailer transporter
