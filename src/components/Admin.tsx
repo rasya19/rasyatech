@@ -326,7 +326,7 @@ export default function Admin() {
     
     try {
         console.log("Calling /api/verify-school...");
-        const response = await fetch('https://rasyatech-lms-engine.vercel.app/api/verify-school', {
+        const response = await fetch('/api/verify-school', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
