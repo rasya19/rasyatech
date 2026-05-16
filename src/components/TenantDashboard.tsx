@@ -32,9 +32,9 @@ export default function TenantDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      <aside className="w-64 bg-white border-r border-slate-200 p-6">
+      <aside className="w-64 flex-shrink-0 bg-white border-r border-slate-200 p-6">
         <h2 className="text-lg font-black mb-8 px-4">LMS Sekolah</h2>
-        <nav className="space-y-2">
+        <nav className="flex flex-col gap-2">
           {tabs.map(tab => (
             <button
               key={tab.id}
