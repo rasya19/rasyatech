@@ -334,7 +334,7 @@ export default function Admin() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                email: verifyingReg.email,
+                email: verifyingReg.admin_email,
                 school_name: verifyingReg.school_name,
                 subdomain
             })
@@ -917,7 +917,7 @@ export default function Admin() {
                       <div>
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Kontak Admin</label>
                         <p className="font-bold text-slate-900">{reg.admin_name || '-'}</p>
-                        <p className="text-xs text-slate-500">{reg.email}</p>
+                        <p className="text-xs text-slate-500">{reg.admin_email}</p>
                       </div>
                       <div>
                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Sekolah / NPSN</label>
@@ -1177,7 +1177,7 @@ export default function Admin() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Admin Sekolah</label>
-                    <input type="email" required value={editingRegistration.email} onChange={e => setEditingRegistration({ ...editingRegistration, email: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
+                    <input type="email" required value={editingRegistration.admin_email || ''} onChange={e => setEditingRegistration({ ...editingRegistration, admin_email: e.target.value })} className="w-full p-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-indigo-600 font-bold" />
                   </div>
                   <div>
                     <label className="text-xs font-black uppercase tracking-widest text-slate-400">Paket</label>
