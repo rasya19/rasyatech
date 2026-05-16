@@ -32,9 +32,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   );
 
   try {
+    // Generate password
+    const generatedPassword = Math.random().toString(36).slice(-8);
+
     // 5. PROSES CREATE USER DI SUPABASE
     const { data: userData, error: userError } = await adminSupabase.auth.admin.createUser({
       email,
+      password: generatedPassword,
       email_confirm: true,
       user_metadata: { school_name, subdomain }
     });
@@ -60,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             from: '"Rasyacomp Support" <ismanto095@gmail.com>',
             to: email,
             subject: `Selamat! Website Sekolah ${school_name} Telah Aktif`,
-            text: `Halo Admin ${school_name},\n\nPendaftaran Anda di Rasyatech telah diverifikasi. Sekarang Anda sudah memiliki website resmi sendiri. Berikut adalah detail akses Anda:\n\nURL Website: https://${subdomain}.rasch.my.id\n\nEmail Login: ${email}\n\nSilakan klik URL di atas untuk mulai mengelola profil sekolah Anda. Terima kasih telah mempercayakan layanan digital Anda kepada Rasyatech.\n\nSalam,\nRasyacomp Support`
+            text: `Halo Admin ${school_name},\n\nPendaftaran Anda di Rasyatech telah diverifikasi. Sekarang Anda sudah memiliki website resmi sendiri. Berikut adalah detail akses Anda:\n\nURL Website: https://${subdomain}.rasch.my.id\n\nEmail Login: ${email}\nPassword: ${generatedPassword}\n\nSilakan klik URL di atas untuk mulai mengelola profil sekolah Anda. Terima kasih telah mempercayakan layanan digital Anda kepada Rasyatech.\n\nSalam,\nRasyacomp Support`
         });
     } else {
         console.warn("EMAIL_USER or EMAIL_PASS not set, skipping email notification");
