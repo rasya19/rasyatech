@@ -450,10 +450,26 @@ export default function Admin() {
     }
   };
 
-  const isAuthorized = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
+  const isAuthorizedSuperAdmin = user?.email?.toLowerCase() === 'ismanto095@gmail.com';
+  const [isAuthorizedTenant, setIsAuthorizedTenant] = useState(false);
+  const currentSubdomain = window.location.hostname.split('.')[0];
+
+  useEffect(() => {
+    if (user && currentSubdomain && currentSubdomain !== 'rasyatech' && currentSubdomain !== 'www') {
+      supabase
+        .from('registrations')
+        .select('*')
+        .eq('subdomain_prefix', currentSubdomain)
+        .eq('admin_email', user.email)
+        .single()
+        .then(({ data }) => setIsAuthorizedTenant(!!data));
+    }
+  }, [user, currentSubdomain]);
+
+  const isAuthorized = isAuthorizedSuperAdmin || isAuthorizedTenant;
   
   // If authorized but somehow reach here with wrong email (belt and suspenders)
-  if (user && !isAuthorized) {
+  if (user && !(isAuthorizedSuperAdmin || isAuthorizedTenant)) {
     return null;
   }
 
