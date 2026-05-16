@@ -330,13 +330,12 @@ export default function Admin() {
             school_name: verifyingReg.school_name,
             subdomain
         });
-        const response = await fetch('/api/verify-school', {
+        const response = await fetch('/api/unverify-school', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                email: verifyingReg.admin_email,
-                school_name: verifyingReg.school_name,
-                subdomain
+                uid: verifyingReg.auth_uid, // Ensure auth_uid is present
+                registrationId: verifyingReg.id
             })
         });
 
