@@ -22,12 +22,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { email, school_name, subdomain } = req.body;
   
   // 4. VALIDASI KONFIGURASI SERVER (ENV)
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.VITE_SUPABASE_URL) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
     return res.status(500).json({ error: "Server configuration missing" });
   }
 
   const adminSupabase = createClient(
-    process.env.VITE_SUPABASE_URL, 
+    process.env.SUPABASE_URL, 
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 

@@ -325,7 +325,11 @@ export default function Admin() {
     if (!verifyingReg || !subdomain) return;
     
     try {
-        console.log("Calling /api/verify-school...");
+        console.log("Calling /api/verify-school with:", {
+            email: verifyingReg.email,
+            school_name: verifyingReg.school_name,
+            subdomain
+        });
         const response = await fetch('/api/verify-school', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
