@@ -44,23 +44,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 6. KONFIGURASI PENGIRIMAN EMAIL (NODEMAILER)
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    // 7. KIRIM EMAIL NOTIFIKASI
-    await transporter.sendMail({
-        from: '"Rasyacomp Support" <ismanto095@gmail.com>',
-        to: email,
-        subject: `Selamat! Website Sekolah ${school_name} Telah Aktif`,
-        text: `Halo Admin ${school_name},\n\nPendaftaran Anda di Rasyatech telah diverifikasi. Sekarang Anda sudah memiliki website resmi sendiri. Berikut adalah detail akses Anda:\n\nURL Website: https://${subdomain}.rasch.my.id\n\nEmail Login: ${email}\n\nSilakan klik URL di atas untuk mulai mengelola profil sekolah Anda. Terima kasih telah mempercayakan layanan digital Anda kepada Rasyatech.\n\nSalam,\nRasyacomp Support`
-    });
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        const transporter = nodemailer.createTransport({
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+          }
+        });
+    
+        // 7. KIRIM EMAIL NOTIFIKASI
+        await transporter.sendMail({
+            from: '"Rasyacomp Support" <ismanto095@gmail.com>',
+            to: email,
+            subject: `Selamat! Website Sekolah ${school_name} Telah Aktif`,
+            text: `Halo Admin ${school_name},\n\nPendaftaran Anda di Rasyatech telah diverifikasi. Sekarang Anda sudah memiliki website resmi sendiri. Berikut adalah detail akses Anda:\n\nURL Website: https://${subdomain}.rasch.my.id\n\nEmail Login: ${email}\n\nSilakan klik URL di atas untuk mulai mengelola profil sekolah Anda. Terima kasih telah mempercayakan layanan digital Anda kepada Rasyatech.\n\nSalam,\nRasyacomp Support`
+        });
+    } else {
+        console.warn("EMAIL_USER or EMAIL_PASS not set, skipping email notification");
+    }
 
     // 8. RESPON SUKSES
     return res.status(200).json({ 

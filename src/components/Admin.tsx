@@ -326,7 +326,7 @@ export default function Admin() {
     
     try {
         console.log("Calling /api/verify-school with:", {
-            email: verifyingReg.email,
+            email: verifyingReg.admin_email,
             school_name: verifyingReg.school_name,
             subdomain
         });
