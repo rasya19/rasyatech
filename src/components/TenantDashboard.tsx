@@ -103,11 +103,13 @@ export default function TenantDashboard() {
                 </div>
             </div>
           )}
-          {activeTab === 'academic' && schoolData && (
+          {activeTab === 'academic' && schoolData?.id ? (
              <div className="space-y-6">
                  <TeachersTable schoolId={schoolData.id} />
                  <StudentsTable schoolId={schoolData.id} />
              </div>
+          ) : activeTab === 'academic' && (
+              <p className="text-slate-500 font-bold">Data sekolah tidak ditemukan.</p>
           )}
           {activeTab === 'profile' && (
              <div className="space-y-6">

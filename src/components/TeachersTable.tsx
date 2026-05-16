@@ -20,7 +20,12 @@ export default function TeachersTable({ schoolId }: { schoolId: string }) {
       .select('*')
       .eq('school_id', schoolId);
     
-    if (data) setTeachers(data);
+    if (error) {
+        console.error("Supabase Error (TeachersTable):", error);
+        alert("Gagal memuat data guru: " + error.message);
+    } else if (data) {
+        setTeachers(data);
+    }
     setLoading(false);
   };
 
