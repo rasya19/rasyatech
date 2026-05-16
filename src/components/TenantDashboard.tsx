@@ -111,12 +111,24 @@ export default function TenantDashboard() {
           )}
           {activeTab === 'profile' && (
              <div className="space-y-6">
-                 <h3 className="text-xl font-bold">Data Sekolah</h3>
-                 <div className="grid grid-cols-2 gap-4">
-                     <p className="font-bold text-slate-400">Nama:</p><p className="font-bold">{schoolData?.school_name}</p>
-                     <p className="font-bold text-slate-400">NPSN:</p><p className="font-bold">{schoolData?.npsn}</p>
-                     <p className="font-bold text-slate-400">Alamat:</p><p className="font-bold">{schoolData?.address}</p>
+                 <div className="flex justify-between items-center">
+                    <h3 className="text-xl font-bold">Data Sekolah</h3>
                  </div>
+                 <div className="bg-slate-50 p-6 rounded-2xl grid grid-cols-2 gap-6">
+                     <div>
+                         <label className="text-xs font-black uppercase text-slate-400">Nama Sekolah</label>
+                         <input className="w-full p-3 mt-1 bg-white rounded-xl font-bold border border-slate-200" defaultValue={schoolData?.school_name} />
+                     </div>
+                     <div>
+                         <label className="text-xs font-black uppercase text-slate-400">NPSN</label>
+                         <input className="w-full p-3 mt-1 bg-white rounded-xl font-bold border border-slate-200" defaultValue={schoolData?.npsn} />
+                     </div>
+                     <div className="col-span-2">
+                         <label className="text-xs font-black uppercase text-slate-400">Alamat</label>
+                         <textarea className="w-full p-3 mt-1 bg-white rounded-xl font-bold border border-slate-200" defaultValue={schoolData?.address} />
+                     </div>
+                 </div>
+                 <button className="px-8 py-3 bg-indigo-600 text-white font-black rounded-xl">Simpan Perubahan</button>
              </div>
           )}
           {activeTab === 'learning' && <p className="text-slate-500 font-bold">Fitur Pembelajaran (Materi/Tugas/Nilai) dalam pengembangan.</p>}
