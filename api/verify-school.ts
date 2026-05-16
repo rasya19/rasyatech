@@ -47,6 +47,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: userError.message });
     }
 
+    // Update registration with auth_uid
+    const { error: dbError } = await adminSupabase
+      .from('registrations')
+      .update({ auth_uid: userData.user.id, status: 'verified' })
+      .eq('admin_email', email);
+
+    if (dbError) {
+        console.error("Failed to update registration with auth_uid:", dbError);
+        // We might want to delete the user if DB update fails to keep things consistent,
+        // but for now, we'll just log it.
+    }
+
     // 6. KONFIGURASI PENGIRIMAN EMAIL (NODEMAILER)
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         const transporter = nodemailer.createTransport({
