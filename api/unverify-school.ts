@@ -18,10 +18,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { uid } = req.body;
+  const { uid, registrationId } = req.body;
   
-  if (!uid) {
-      return res.status(400).json({ error: "User ID (uid) is required" });
+  if (!uid || !registrationId) {
+      return res.status(400).json({ error: "User ID (uid) and registrationId are required" });
   }
 
   // 4. VALIDASI KONFIGURASI SERVER (ENV)
@@ -35,17 +35,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   );
 
   try {
-    // 5. PROSES DELETE USER DI SUPABASE
+    // 5a. UPDATE STATUS DI DATABASE
+    const { error: dbError } = await adminSupabase
+      .from('registrations')
+      .update({ status: 'pending' })
+      .eq('id', registrationId);
+
+    if (dbError) {
+        return res.status(400).json({ error: `Database error: ${dbError.message}` });
+    }
+
+    // 5b. PROSES DELETE USER DI SUPABASE AUTH
     const { error: deleteError } = await adminSupabase.auth.admin.deleteUser(uid);
 
     if (deleteError) {
-        return res.status(400).json({ error: deleteError.message });
+        console.error("Auth delete error:", deleteError);
+        // Note: DB is updated, user auth not deleted. Might want to roll back DB update here.
+        return res.status(400).json({ error: `Auth error: ${deleteError.message}` });
     }
 
     // 6. RESPON SUKSES
     return res.status(200).json({ 
         success: true, 
-        message: "Verifikasi berhasil dibatalkan (User dihapus)"
+        message: "Verifikasi berhasil dibatalkan (Status: pending, User dihapus)"
     });
 
   } catch (error: any) {
